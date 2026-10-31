@@ -1,0 +1,19 @@
+{
+  "name": "abroad-shield-club",
+  "version": "1.0.0",
+  "description": "AbroadShield Club - Real Feedback from Students Abroad to Protect New Aspirants from Agent Traps",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js"
+  },
+  "keywords": [
+    "study-abroad",
+    "student-feedback",
+    "agent-reviews",
+    "supabase",
+    "community"
+  ],
+  "author": "AbroadShield Community",
+  "license": "MIT"
+}

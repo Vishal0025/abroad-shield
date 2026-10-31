@@ -1,0 +1,1874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AbroadShield Club | Real Feedback from Students Abroad — Don't Fall for Agent Scams</title>
+  <meta name="description" content="Connect with verified seniors studying in Canada, UK, USA, Australia, and Germany. Read honest consultancy reviews, scan agent red flags, and chat directly without sharing your phone number.">
+  <meta name="keywords" content="study abroad, student feedback, agent scam, consultancy review, Canada student visa, UK master living cost, Germany tuition free, Australia student PR">
+
+  <!-- Google Fonts: Outfit & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- FontAwesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Core Stylesheet -->
+  <link rel="stylesheet" href="css/index.css">
+
+  <!-- Supabase CDN Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <!-- Top Real-Time Alert Ticker (Interactive Senior Advisory - No Year Mentioned) -->
+  <aside class="top-notice-bar" id="topAlertBar" aria-label="Urgent community advice">
+    <div class="advisory-pill-wrap">
+      <span class="notice-pill"><i class="fa-solid fa-bell"></i> Senior Advisory</span>
+      <span class="advisory-counter-pill" id="advisoryCounterPill">1 / 5</span>
+    </div>
+    
+    <div class="advisory-text-track" id="advisoryTextTrack" onclick="window.nextAdvisory()" title="Click to view next advice">
+      <span id="advisoryMessageText">
+        🚨 <strong>Document Safety:</strong> Never leave original passports or marksheets with any education consultant. Embassies only require verified digital uploads!
+      </span>
+    </div>
+
+    <div class="advisory-nav-actions">
+      <button type="button" class="advisory-nav-btn" id="btnPrevAdvisory" onclick="window.prevAdvisory()" title="Previous Senior Advice" aria-label="Previous Advice">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+      <button type="button" class="advisory-nav-btn" id="btnNextAdvisory" onclick="window.nextAdvisory()" title="Next Senior Advice" aria-label="Next Advice">
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+      <button type="button" class="advisory-scan-btn" onclick="window.switchTabAndScrollScanner()" title="Check Agent With Scanner">
+        <i class="fa-solid fa-shield-virus"></i> Check My Agent
+      </button>
+    </div>
+  </aside>
+
+  <!-- Optional Verification Reminder Banner (Shown if user cancels/skips verification to browse first) -->
+  <div id="verificationLaterBanner" class="verification-later-banner" style="display: none;">
+    <div class="verify-banner-content">
+      <i class="fa-solid fa-shield-halved" style="color: var(--cyan-bright); font-size: 1.1rem;"></i>
+      <span><strong>Student Verification Paused:</strong> You can explore feeds and advice freely, or verify anytime to unlock senior DMs and review consultancies.</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <button type="button" class="btn-verify-now" onclick="window.reopenOnboardingWizard()">
+        <i class="fa-solid fa-id-card"></i> Complete Verification
+      </button>
+      <button type="button" class="btn-dismiss-banner" onclick="document.getElementById('verificationLaterBanner').style.display='none'">&times;</button>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       MOBILE SIDE MENU / DRAWER (Android & iPhone Ergonomic View)
+       ==================================================================== -->
+  <div class="mobile-drawer-backdrop" id="mobileDrawerBackdrop" onclick="window.closeMobileMenu()" aria-hidden="true"></div>
+
+  <aside class="mobile-side-drawer" id="mobileSideDrawer" aria-label="Mobile Navigation Menu">
+    <!-- Drawer Header -->
+    <div class="mobile-drawer-header">
+      <div class="drawer-brand">
+        <img src="assets/logo.jpg" alt="AbroadShield Club Emblem" class="drawer-logo-img">
+        <div>
+          <h3 class="drawer-title">AbroadShield</h3>
+          <span class="drawer-subtitle">Student Defense Club</span>
+        </div>
+      </div>
+      <button type="button" class="drawer-close-btn" id="btnMobileDrawerClose" onclick="window.closeMobileMenu()" aria-label="Close menu">&times;</button>
+    </div>
+
+    <!-- Drawer Body -->
+    <div class="mobile-drawer-body">
+      
+      <!-- Student Auth / Identity Status Card in Drawer -->
+      <div class="drawer-auth-card" id="drawerAuthCard">
+        <!-- Injected via JavaScript based on login state -->
+      </div>
+
+      <!-- Core Navigation Sections (Tabs) -->
+      <div class="drawer-nav-group">
+        <div class="drawer-group-label">Core Platform Navigation</div>
+        <ul class="drawer-nav-list">
+          <li class="drawer-nav-item active" data-tab="reviews" onclick="window.mobileNavigateTab('reviews')">
+            <span class="drawer-nav-icon"><i class="fa-solid fa-building-shield"></i></span>
+            <span class="drawer-nav-text">Agent Wall of Truth</span>
+            <span class="drawer-nav-badge" id="drawerCountReviews">5</span>
+          </li>
+          <li class="drawer-nav-item" data-tab="chat" onclick="window.mobileNavigateTab('chat')">
+            <span class="drawer-nav-icon"><i class="fa-brands fa-instagram"></i></span>
+            <span class="drawer-nav-text">Direct Chat with Seniors</span>
+            <span class="drawer-nav-badge live">Live</span>
+          </li>
+          <li class="drawer-nav-item" data-tab="feed" onclick="window.mobileNavigateTab('feed')">
+            <span class="drawer-nav-icon"><i class="fa-solid fa-users-line"></i></span>
+            <span class="drawer-nav-text">Senior Q&amp;A Club Feed</span>
+            <span class="drawer-nav-badge" id="drawerCountFeed">3</span>
+          </li>
+          <li class="drawer-nav-item" data-tab="scanner" onclick="window.mobileNavigateTab('scanner')">
+            <span class="drawer-nav-icon"><i class="fa-solid fa-radar"></i></span>
+            <span class="drawer-nav-text">Red Flag Scanner &amp; Calculator</span>
+          </li>
+          <li class="drawer-nav-item" data-tab="seniors" onclick="window.mobileNavigateTab('seniors')">
+            <span class="drawer-nav-icon"><i class="fa-solid fa-user-graduate"></i></span>
+            <span class="drawer-nav-text">Verified Senior Mentors</span>
+            <span class="drawer-nav-badge" id="drawerCountSeniors">6</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Country Filter Quick Selector -->
+      <div class="drawer-nav-group">
+        <div class="drawer-group-label">Select Study Destination</div>
+        <div class="drawer-country-grid">
+          <button class="drawer-country-chip active" data-country="All" onclick="window.mobileSelectCountry('All')">🌐 All Countries</button>
+          <button class="drawer-country-chip" data-country="Canada" onclick="window.mobileSelectCountry('Canada')">🇨🇦 Canada</button>
+          <button class="drawer-country-chip" data-country="UK" onclick="window.mobileSelectCountry('UK')">🇬🇧 UK</button>
+          <button class="drawer-country-chip" data-country="USA" onclick="window.mobileSelectCountry('USA')">🇺🇸 USA</button>
+          <button class="drawer-country-chip" data-country="Australia" onclick="window.mobileSelectCountry('Australia')">🇦🇺 Australia</button>
+          <button class="drawer-country-chip" data-country="Germany" onclick="window.mobileSelectCountry('Germany')">🇩🇪 Germany</button>
+          <button class="drawer-country-chip" data-country="Ireland" onclick="window.mobileSelectCountry('Ireland')">🇮🇪 Ireland</button>
+          <button class="drawer-country-chip" data-country="France" onclick="window.mobileSelectCountry('France')">🇫🇷 France</button>
+        </div>
+      </div>
+
+      <!-- Quick Action Buttons -->
+      <div class="drawer-nav-group">
+        <div class="drawer-group-label">Quick Actions</div>
+        <div class="drawer-actions-stack">
+          <button type="button" class="drawer-action-btn primary" onclick="window.closeMobileMenu(); openModal('modalSubmitReview')">
+            <i class="fa-solid fa-plus"></i> Review Your Consultant
+          </button>
+          <button type="button" class="drawer-action-btn secondary" onclick="window.closeMobileMenu(); openModal('modalSubmitPost')">
+            <i class="fa-solid fa-pen-to-square"></i> Ask Question on Feed
+          </button>
+          <button type="button" class="drawer-action-btn accent" onclick="window.closeMobileMenu(); window.switchTabAndScrollScanner()">
+            <i class="fa-solid fa-shield-virus"></i> Run Red-Flag Lie Scanner
+          </button>
+        </div>
+      </div>
+
+      <!-- Admin Portal Access Link (Discreet) -->
+      <div class="drawer-admin-access">
+        <a href="/admin" class="drawer-admin-link" onclick="window.closeMobileMenu(); window.openAdminVaultModal(); return false;">
+          <i class="fa-solid fa-lock"></i> Platform Admin Portal
+        </a>
+      </div>
+
+    </div>
+
+    <!-- Drawer Footer -->
+    <div class="mobile-drawer-footer">
+      <div class="drawer-footer-badge">
+        <i class="fa-solid fa-shield-halved"></i> 100% ID Privacy Guaranteed
+      </div>
+      <div class="drawer-footer-note">
+        AbroadShield • iOS &amp; Android Ergonomic View
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Navigation Header -->
+  <header class="app-header" id="appMainHeader">
+    <div class="header-container">
+      
+      <!-- Mobile Hamburger Button (Android & iPhone) -->
+      <button type="button" class="mobile-menu-toggle-btn" id="btnMobileMenuToggle" onclick="window.openMobileMenu()" aria-label="Open mobile navigation menu">
+        <i class="fa-solid fa-bars-staggered"></i>
+      </button>
+
+      <!-- Logo & Brand Title -->
+      <a href="#" class="brand-wrapper" id="brandLogoLink">
+        <img src="assets/logo.jpg" alt="AbroadShield Club Emblem" class="brand-logo-img" id="appLogoImg">
+        <div class="brand-title">
+          <span>AbroadShield</span>
+          <span class="brand-subtitle">Student Defense Club</span>
+        </div>
+      </a>
+
+      <!-- Country Filter Toolbar with Real-Time Student Counters (Global Destinations) -->
+      <nav class="country-toolbar" id="countryFilterNav" aria-label="Country Filter">
+        <button class="country-pill active" data-country="All" id="filterCountryAll">
+          <i class="fa-solid fa-globe"></i> All (<span id="countAll">1,447</span>)
+        </button>
+        <button class="country-pill" data-country="Canada" id="filterCountryCanada">
+          🇨🇦 Canada <span class="country-count-tag" id="countCanada">248</span>
+        </button>
+        <button class="country-pill" data-country="UK" id="filterCountryUK">
+          🇬🇧 UK <span class="country-count-tag" id="countUK">182</span>
+        </button>
+        <button class="country-pill" data-country="USA" id="filterCountryUSA">
+          🇺🇸 USA <span class="country-count-tag" id="countUSA">135</span>
+        </button>
+        <button class="country-pill" data-country="Australia" id="filterCountryAus">
+          🇦🇺 Australia <span class="country-count-tag" id="countAus">98</span>
+        </button>
+        <button class="country-pill" data-country="Germany" id="filterCountryGermany">
+          🇩🇪 Germany <span class="country-count-tag" id="countGermany">129</span>
+        </button>
+        <button class="country-pill" data-country="Ireland" id="filterCountryIreland">
+          🇮🇪 Ireland <span class="country-count-tag" id="countIreland">64</span>
+        </button>
+        <button class="country-pill" data-country="France" id="filterCountryFrance">
+          🇫🇷 France <span class="country-count-tag" id="countFrance">52</span>
+        </button>
+        <button class="country-pill" data-country="Netherlands" id="filterCountryNetherlands">
+          🇳🇱 Netherlands <span class="country-count-tag" id="countNetherlands">41</span>
+        </button>
+
+        <!-- Global Country Selector for 40+ Destinations -->
+        <div class="global-country-picker-wrap">
+          <select class="global-country-dropdown" id="globalCountryDropdownSelect" title="Select Any Global Destination">
+            <option value="" disabled selected>🌐 40+ More Countries...</option>
+            <option value="New Zealand">🇳🇿 New Zealand (47)</option>
+            <option value="Singapore">🇸🇬 Singapore (33)</option>
+            <option value="Italy">🇮🇹 Italy (36)</option>
+            <option value="Spain">🇪🇸 Spain (25)</option>
+            <option value="Switzerland">🇨🇭 Switzerland (19)</option>
+            <option value="Sweden">🇸🇪 Sweden (28)</option>
+            <option value="UAE">🇦🇪 UAE / Dubai (44)</option>
+            <option value="Japan">🇯🇵 Japan (22)</option>
+            <option value="South Korea">🇰🇷 South Korea (18)</option>
+            <option value="Poland">🇵🇱 Poland (31)</option>
+            <option value="Finland">🇫🇮 Finland (15)</option>
+            <option value="Norway">🇳🇴 Norway (12)</option>
+            <option value="Denmark">🇩🇰 Denmark (14)</option>
+            <option value="Malaysia">🇲🇾 Malaysia (26)</option>
+            <option value="Austria">🇦🇹 Austria (16)</option>
+            <option value="Belgium">🇧🇪 Belgium (13)</option>
+            <option value="Czech Republic">🇨🇿 Czech Republic (17)</option>
+            <option value="Hungary">🇭🇺 Hungary (19)</option>
+            <option value="Cyprus">🇨🇾 Cyprus (21)</option>
+            <option value="Malta">🇲🇹 Malta (11)</option>
+            <option value="Lithuania">🇱🇹 Lithuania (10)</option>
+            <option value="Latvia">🇱🇻 Latvia (9)</option>
+            <option value="Estonia">🇪🇪 Estonia (8)</option>
+            <option value="Georgia">🇬🇪 Georgia (14)</option>
+            <option value="Philippines">🇵🇭 Philippines (12)</option>
+            <option value="Other">🌍 Other Global Destination</option>
+          </select>
+        </div>
+      </nav>
+
+      <!-- Right Header Actions (Live Student Count Ticker, Admin Vault, Google Auth, Chat & Profile) -->
+      <div class="header-actions">
+        <!-- Live Verified Students Ticker (Auto-updating) -->
+        <div class="live-student-ticker" id="headerLiveStudents" title="Live Verified Students Enrolled Across Countries">
+          <span class="ticker-pulse-dot"></span>
+          <i class="fa-solid fa-graduation-cap"></i>
+          <span><strong id="headerTotalStudentsCount">792</strong> Students Abroad</span>
+        </div>
+
+
+        <!-- Google Sign In Button -->
+        <button class="google-auth-btn" id="btnHeaderGoogleLogin" onclick="openModal('modalGoogleAuth')" title="Sign in with Google">
+          <svg class="google-icon" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          <span>Sign in with Google</span>
+        </button>
+
+        <button class="dm-shortcut-btn" id="headerDmBtn" title="Direct Messages with Seniors">
+          <i class="fa-solid fa-paper-plane"></i>
+          <span>DMs</span>
+          <span class="unread-badge" id="unreadBadge">Live</span>
+        </button>
+
+        <button class="user-profile-btn" id="userProfilePill" title="Switch or Edit Profile" style="display: none;">
+          <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150" alt="Your Avatar" class="user-avatar-mini" id="userDisplayAvatar">
+          <div class="user-info-text">
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <span class="user-handle-txt" id="userDisplayHandle">@loading...</span>
+              <span class="google-verified-tag" id="userGoogleTag" title="Google Verified Account"><i class="fa-solid fa-check"></i> Google</span>
+            </div>
+            <span class="user-role-badge" id="userDisplayRole">Aspirant</span>
+          </div>
+          <i class="fa-solid fa-chevron-down" style="font-size: 0.7rem; color: var(--text-muted); margin-left: 4px;"></i>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Hero Banner Section -->
+  <section class="hero-section" id="heroBannerSection">
+    <div class="hero-card">
+      <img src="assets/hero_banner.jpg" alt="Students navigating international studies with illuminated holographic globe" class="hero-background-art" id="heroBannerImg">
+      <div class="hero-content">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;">
+          <div class="hero-badge" style="margin-bottom: 0;">
+            <i class="fa-solid fa-shield-cat"></i>
+            <span>100% Anonymous & Independent Student Network</span>
+          </div>
+          <div class="fx-3d-pill">
+            <span class="hologram-cube-icon"><i class="fa-solid fa-cube"></i></span>
+            <span>Interactive 3D Hubs</span>
+          </div>
+        </div>
+        <h1 class="hero-title">
+          Don't Fall for <span class="highlight-red">Agent Lies.</span><br>
+          Get The <span class="highlight-cyan">Ground Truth</span> From Seniors Abroad.
+        </h1>
+        <p class="hero-desc">
+          Middle-class families lose lakhs to dishonest consultancy threats, fake PR promises, and hidden commissions. 
+          <strong>AbroadShield Club</strong> is where verified seniors share real living costs, rate agent conduct, and answer your questions directly—<strong>without needing your phone number or WhatsApp.</strong>
+        </p>
+
+        <div class="hero-cta-group">
+          <button class="btn-danger" id="btnHeroReportAgent" type="button" onclick="window.openModal('modalSubmitReview')">
+            <i class="fa-solid fa-triangle-exclamation"></i> Report / Review Your Agent
+          </button>
+          <button class="btn-primary" id="btnHeroChatSenior" type="button" onclick="window.goToChatView()">
+            <i class="fa-regular fa-comments"></i> Chat with Verified Seniors
+          </button>
+          <button class="btn-secondary" id="btnHeroScanLie" type="button" onclick="window.switchTabAndScrollScanner()">
+            <i class="fa-solid fa-magnifying-glass-chart"></i> Scam Scanner
+          </button>
+          <button class="btn-secondary" id="btnHeroCalcCost" type="button" onclick="window.switchTabAndScrollCostCalc()">
+            <i class="fa-solid fa-calculator"></i> Real Cost Calculator
+          </button>
+        </div>
+
+        <div class="hero-stats-row">
+          <div class="stat-item">
+            <span class="stat-num" id="statReportedCases">1,480+</span>
+            <span class="stat-label">Agent Reviews & Warnings</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-num" id="statMoneySaved">₹4.8 Cr</span>
+            <span class="stat-label">Unnecessary Fees Saved</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-num">5 Countries</span>
+            <span class="stat-label">Canada, UK, USA, AUS, GER</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-num">0 Phone #s</span>
+            <span class="stat-label">100% Privacy Protected</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Navigation Tabs -->
+  <nav class="tabs-navigation-wrapper" id="mainTabsNav" aria-label="Main Navigation">
+    <div class="tabs-bar">
+      <button class="tab-btn active" data-tab="reviews" id="tabBtnReviews">
+        <i class="fa-solid fa-building-shield"></i>
+        <span>Agent Wall of Truth</span>
+        <span class="tab-counter" id="countTabReviews">5</span>
+      </button>
+
+      <button class="tab-btn" data-tab="chat" id="tabBtnChat">
+        <i class="fa-brands fa-instagram"></i>
+        <span>Direct Chat with Seniors</span>
+        <span class="tab-counter" style="background: var(--cyan-primary);">Live</span>
+      </button>
+
+      <button class="tab-btn" data-tab="feed" id="tabBtnFeed">
+        <i class="fa-solid fa-users-line"></i>
+        <span>Senior Q&amp;A Club Feed</span>
+        <span class="tab-counter" id="countTabFeed">3</span>
+      </button>
+
+      <button class="tab-btn" data-tab="scanner" id="tabBtnScanner">
+        <i class="fa-solid fa-radar"></i>
+        <span>Red Flag Scanner &amp; Cost Calculator</span>
+      </button>
+
+      <button class="tab-btn" data-tab="seniors" id="tabBtnSeniors">
+        <i class="fa-solid fa-user-graduate"></i>
+        <span>Verified Senior Mentors</span>
+        <span class="tab-counter" id="countTabSeniors">6</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main Content Container -->
+  <main class="main-app-container">
+
+    <!-- ====================================================================
+         VIEW 1: Agent Wall of Truth & Reviews
+         ==================================================================== -->
+    <section class="tab-view-content active" id="view-reviews">
+      <!-- Crowdsourced Agency Wall Creation Card -->
+      <div class="agent-wall-crowdsource-card" id="agentCrowdsourceSection">
+        <div class="crowdsource-badge">
+          <i class="fa-solid fa-users-gear"></i>
+          <span>Global Crowdsourced Registry</span>
+        </div>
+        <h3 class="crowdsource-title">
+          <i class="fa-solid fa-building-shield" style="color: var(--cyan-bright);"></i>
+          Enter Any Agency to Check or Add to Wall of Truth
+        </h3>
+        <p class="crowdsource-desc">
+          AbroadShield is powered by genuine students. If your education consultant isn't on the Wall yet, type their name below to register their profile instantly and submit your honest feedback to protect fellow juniors!
+        </p>
+        <div class="crowdsource-input-group">
+          <div class="crowdsource-input-wrapper">
+            <i class="fa-solid fa-magnifying-glass crowdsource-input-icon"></i>
+            <input type="text" class="crowdsource-field" id="crowdsourceAgencyInput" placeholder="Enter agency name (e.g. Canam, IDP, Apex Global, Overseas Pathway Hub, Y-Axis)..." autocomplete="off">
+          </div>
+          <button type="button" class="btn-primary" id="btnCrowdsourceCheckOrCreate" onclick="window.handleCheckOrCreateAgency()">
+            <i class="fa-solid fa-plus-circle"></i> Check or Add Agency &amp; Review
+          </button>
+        </div>
+      </div>
+
+      <div class="section-toolbar">
+        <div class="search-input-box">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" class="search-field" id="reviewSearchInput" placeholder="Search consultancy name (IDP, Canam, Apex, Y-Axis) or city...">
+        </div>
+
+        <div class="filter-pills-row">
+          <button class="filter-chip active" data-filter="all" id="filterReviewAll">All Reviews</button>
+          <button class="filter-chip" data-filter="danger" id="filterReviewDanger">⚠️ High Risk / Fake Claims (1-2 Stars)</button>
+          <button class="filter-chip" data-filter="safe" id="filterReviewSafe">✅ Recommended / Honest (4-5 Stars)</button>
+          <button class="btn-primary" id="btnOpenReviewModal" style="padding: 8px 16px; font-size: 0.85rem;">
+            <i class="fa-solid fa-plus"></i> Submit Agency Review
+          </button>
+        </div>
+      </div>
+
+      <!-- Reviews Cards Grid -->
+      <div class="reviews-grid" id="reviewsGrid">
+        <!-- Rendered dynamically by app.js from Supabase -->
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         VIEW 2: Instagram-Style Direct Messaging (Chat Without Phone Number)
+         ==================================================================== -->
+    <section class="tab-view-content" id="view-chat">
+      <!-- Chat Authentication Gate: Displayed when user is NOT signed in -->
+      <div class="chat-auth-gate" id="chatAuthGate" style="display: none;">
+        <div class="chat-auth-card">
+          <div class="chat-auth-icon-wrap">
+            <i class="fa-solid fa-user-shield"></i>
+          </div>
+          <span class="chat-auth-badge"><i class="fa-solid fa-lock"></i> Student Authentication Required</span>
+          <h2 class="chat-auth-title">Sign In with Google to Chat with Seniors</h2>
+          <p class="chat-auth-desc">
+            AbroadShield protects enrolled seniors from commercial sales bots, visa marketing reps, and recruiter spam. Connect your Google student account to message verified seniors 1-on-1.
+          </p>
+
+          <div class="chat-auth-benefits">
+            <div class="benefit-item">
+              <i class="fa-solid fa-shield-halved"></i>
+              <div class="benefit-text">
+                <strong>100% Anonymous Handle</strong>
+                <span>Chat using your chosen @username — your real name is never exposed</span>
+              </div>
+            </div>
+            <div class="benefit-item">
+              <i class="fa-solid fa-phone-slash"></i>
+              <div class="benefit-text">
+                <strong>No Phone Numbers or WhatsApp</strong>
+                <span>Never get harassed or spammed by third-party consultancy sales agents</span>
+              </div>
+            </div>
+            <div class="benefit-item">
+              <i class="fa-solid fa-graduation-cap"></i>
+              <div class="benefit-text">
+                <strong>Direct Ground Reality Answers</strong>
+                <span>Ask seniors about actual living costs, part-time jobs, and agent lies</span>
+              </div>
+            </div>
+          </div>
+
+          <button class="google-auth-btn chat-auth-google-btn" onclick="openModal('modalGoogleAuth')">
+            <svg class="google-icon" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+            </svg>
+            <span>Sign in with Google to Start Chatting</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="chat-app-wrapper" id="chatAppContainer">
+        
+        <!-- Chat Left Sidebar -->
+        <aside class="chat-sidebar">
+          <div class="chat-sidebar-header">
+            <h2 class="chat-sidebar-title">
+              <i class="fa-brands fa-instagram" style="color: var(--cyan-bright);"></i>
+              Direct Messages
+            </h2>
+            <span class="privacy-pill-sm"><i class="fa-solid fa-lock"></i> No Phone #</span>
+          </div>
+
+          <!-- Chat Filter Tabs (All Mentors vs My Friends) -->
+          <div class="chat-sidebar-filter-tabs">
+            <button class="chat-filter-tab active" id="chatFilterAll" type="button" onclick="window.setChatFilter('all')">
+              <i class="fa-solid fa-users"></i> All Mentors (<span id="chatCountAll">10</span>)
+            </button>
+            <button class="chat-filter-tab" id="chatFilterFriends" type="button" onclick="window.setChatFilter('friends')">
+              <i class="fa-solid fa-heart" style="color: #f472b6;"></i> My Friends (<span id="chatCountFriends">2</span>)
+            </button>
+          </div>
+
+          <!-- Thread List -->
+          <ul class="chat-threads-list" id="chatThreadsList">
+            <!-- Populated dynamically with senior profiles from Supabase -->
+          </ul>
+        </aside>
+
+        <!-- Chat Conversation Area -->
+        <div class="chat-main-view">
+          <!-- Active Senior Header -->
+          <div class="chat-header">
+            <div class="active-user-meta">
+              <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150" alt="Active Chat Mentor" class="active-avatar" id="activeChatAvatar">
+              <div class="active-details">
+                <div class="active-name-row">
+                  <span class="active-name" id="activeChatName">Rahul Sharma</span>
+                  <span class="verified-senior-pill"><i class="fa-solid fa-circle-check"></i> Verified Senior Abroad</span>
+                </div>
+                <span class="active-sub" id="activeChatSub">🇨🇦 York University (Toronto, ON)</span>
+              </div>
+            </div>
+
+              <!-- Add Friend / Friend Status Toggle -->
+              <button class="btn-chat-friend" id="btnActiveChatFriend" type="button" onclick="window.toggleFriendshipForActiveUser()">
+                <i class="fa-solid fa-user-plus"></i> <span id="btnActiveChatFriendText">Add Friend</span>
+              </button>
+
+              <!-- Public WhatsApp Contact Pill (Shown only if senior opted in to share publicly) -->
+              <a class="btn-chat-wa-pill" id="btnChatHeaderWhatsApp" href="#" target="_blank" rel="noopener noreferrer" style="display: none;" title="Open WhatsApp Chat with Senior">
+                <i class="fa-brands fa-whatsapp"></i> <span id="btnChatHeaderWhatsAppText">WhatsApp Senior</span>
+              </a>
+
+              <!-- In-Header Quick Google Login for Guests -->
+              <button class="btn-chat-login-pill" id="btnChatHeaderLogin" type="button" onclick="window.promptChatLogin()" style="display: none;">
+                <i class="fa-brands fa-google"></i> Sign In to Chat
+              </button>
+
+              <span class="anonymous-chat-tag">
+                <i class="fa-solid fa-shield-halved"></i> Anonymous Chat
+              </span>
+            </div>
+          </div>
+
+          <!-- Message Scroll Area -->
+          <div class="messages-scroll-area" id="messagesScrollArea">
+            <!-- Messages rendered dynamically -->
+          </div>
+
+          <!-- In-Chat Login Banner for Guests -->
+          <div class="chat-guest-login-banner" id="chatGuestLoginBanner" style="display: none;">
+            <div class="guest-banner-left">
+              <div class="guest-banner-avatar"><i class="fa-brands fa-google"></i></div>
+              <div>
+                <div class="guest-banner-title">Sign in to message <span id="chatGuestSeniorName">this senior</span> &amp; make friends</div>
+                <div class="guest-banner-sub">100% Anonymous student protection • Real names &amp; phone numbers hidden</div>
+              </div>
+            </div>
+            <button type="button" class="chat-guest-login-btn" onclick="window.promptChatLogin()">
+              <i class="fa-brands fa-google"></i> Sign In with Google
+            </button>
+          </div>
+
+          <!-- Quick Prompts Chips -->
+          <div class="quick-prompts-bar">
+            <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Quick Ask:</span>
+            <button class="quick-prompt-chip" data-prompt="Did your agent lie to you about part-time jobs?">Jobs reality?</button>
+            <button class="quick-prompt-chip" data-prompt="What is the real monthly shared rent in your city?">Actual rent?</button>
+            <button class="quick-prompt-chip" data-prompt="My agent is pushing a private tie-up college, should I accept it?">Private college trap?</button>
+            <button class="quick-prompt-chip" data-prompt="Is it possible to apply directly without paying 1-2 lakhs file fee?">Self-apply process?</button>
+          </div>
+
+          <!-- Chat Input Bar -->
+          <form class="chat-input-bar" id="chatInputForm">
+            <input type="text" class="chat-input-field" id="chatMsgInput" placeholder="Message senior or friend without sharing phone or WhatsApp..." autocomplete="off">
+            <button type="submit" class="chat-send-btn" id="btnSendChatMsg" title="Send Message">
+              <i class="fa-solid fa-paper-plane"></i>
+            </button>
+          </form>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         VIEW 3: Senior Q&A Club Feed
+         ==================================================================== -->
+    <section class="tab-view-content" id="view-feed">
+      <div class="section-toolbar">
+        <div>
+          <h2 style="font-family: var(--font-display); font-size: 1.4rem;">Student Club Feed &amp; Discussions</h2>
+          <p style="color: var(--text-secondary); font-size: 0.85rem;">Real stories, visa rule shifts, and questions asked by students for students.</p>
+        </div>
+        <button class="btn-primary" id="btnOpenPostModal">
+          <i class="fa-solid fa-pen-to-square"></i> Ask Question / Share Truth
+        </button>
+      </div>
+
+      <div class="discussions-list" id="discussionsList">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         VIEW 4: Red Flag Scanner & Cost Calculator
+         ==================================================================== -->
+    <section class="tab-view-content" id="view-scanner">
+      <div class="scanner-grid">
+        
+        <!-- Tool 1: Agent Lie & Threat Scanner -->
+        <div class="scanner-card" id="agentLieScannerSection">
+          <h2 class="scanner-title">
+            <i class="fa-solid fa-shield-virus" style="color: var(--red-danger);"></i>
+            Agent Red-Flag Scanner
+          </h2>
+          <p class="scanner-subtitle">
+            Check each statement below that your education consultant told you or your parents:
+          </p>
+
+          <div class="checklist-group">
+            <label class="check-item">
+              <input type="checkbox" class="scanner-checkbox" data-weight="25">
+              <span class="check-text"><strong>Withholding Original Documents:</strong> They asked to keep your original 10th/12th/Degree certificates or passport.</span>
+            </label>
+
+            <label class="check-item">
+              <input type="checkbox" class="scanner-checkbox" data-weight="25">
+              <span class="check-text"><strong>Guaranteed Job Lie:</strong> "You will easily get $20/hr part-time job from Day 1 and pay next semester's tuition fees."</span>
+            </label>
+
+            <label class="check-item">
+              <input type="checkbox" class="scanner-checkbox" data-weight="20">
+              <span class="check-text"><strong>Private College Push:</strong> Steered you away from top universities into an unknown private college or strip-mall campus.</span>
+            </label>
+
+            <label class="check-item">
+              <input type="checkbox" class="scanner-checkbox" data-weight="20">
+              <span class="check-text"><strong>Extortionate File Fees:</strong> Charged ₹50,000 to ₹1,50,000 for "embassy quota" or "exclusive SOP review".</span>
+            </label>
+
+            <label class="check-item">
+              <input type="checkbox" class="scanner-checkbox" data-weight="15">
+              <span class="check-text"><strong>Understated Expenses:</strong> Claimed total monthly living cost is under $500 or £500.</span>
+            </label>
+
+            <label class="check-item">
+              <input type="checkbox" class="scanner-checkbox" data-weight="20">
+              <span class="check-text"><strong>Hidden Portal Login:</strong> Refused to share your actual university application login or password.</span>
+            </label>
+          </div>
+
+          <!-- Live Risk Meter -->
+          <div class="meter-card">
+            <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Agent Malpractice Risk Level</div>
+            <div class="meter-score-num safe" id="scannerScoreNum">0%</div>
+            <div class="meter-bar-track">
+              <div class="meter-bar-fill" id="scannerBarFill"></div>
+            </div>
+            <div class="meter-verdict" id="scannerVerdict">
+              <span style="color: var(--emerald-safe);"><i class="fa-solid fa-circle-check"></i> Safe Process</span>
+            </div>
+            <p id="scannerAdvice" style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 8px;">
+              Select the boxes above to analyze your consultant's behavior.
+            </p>
+          </div>
+        </div>
+
+        <!-- Tool 2: Cost of Living Reality Calculator -->
+        <div class="scanner-card" id="costCalcSection">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+            <h2 class="scanner-title" style="margin-bottom: 0;">
+              <i class="fa-solid fa-chart-pie" style="color: var(--cyan-bright);"></i>
+              Real Living Cost Calculator
+            </h2>
+            <label style="font-size: 0.78rem; font-weight: 700; color: var(--cyan-bright); display: flex; align-items: center; gap: 6px; cursor: pointer;">
+              <input type="checkbox" id="calcCurrencyToggle" style="accent-color: var(--cyan-primary);">
+              Show in INR (₹)
+            </label>
+          </div>
+          <p class="scanner-subtitle">
+            Compare what agents quote in brochures vs what seniors actually spend on ground.
+          </p>
+
+          <div class="calc-row">
+            <label class="form-label" for="calcCitySelect">Target City:</label>
+            <select class="form-select" id="calcCitySelect" style="width: 100%;">
+              <option value="Toronto">🇨🇦 Toronto, Canada (GTA)</option>
+              <option value="Vancouver">🇨🇦 Vancouver, Canada</option>
+              <option value="London">🇬🇧 London, UK</option>
+              <option value="Birmingham">🇬🇧 Birmingham, UK</option>
+              <option value="Dallas">🇺🇸 Dallas / Texas, USA</option>
+              <option value="Melbourne">🇦🇺 Melbourne, Australia</option>
+              <option value="Berlin">🇩🇪 Berlin, Germany</option>
+            </select>
+          </div>
+
+          <div class="calc-row">
+            <div class="calc-label-row">
+              <span>Monthly Room Rent (Shared):</span>
+              <span id="lblRentVal" style="color: var(--cyan-bright); font-weight: 800;">$850</span>
+            </div>
+            <input type="range" class="range-slider" id="calcRentSlider" min="300" max="1800" step="25" value="850">
+          </div>
+
+          <div class="calc-row">
+            <div class="calc-label-row">
+              <span>Groceries &amp; Indian Meals:</span>
+              <span id="lblFoodVal" style="color: var(--cyan-bright); font-weight: 800;">$300</span>
+            </div>
+            <input type="range" class="range-slider" id="calcFoodSlider" min="100" max="600" step="20" value="300">
+          </div>
+
+          <div class="calc-row">
+            <div class="calc-label-row">
+              <span>Public Transit Pass:</span>
+              <span id="lblTransitVal" style="color: var(--cyan-bright); font-weight: 800;">$130</span>
+            </div>
+            <input type="range" class="range-slider" id="calcTransitSlider" min="30" max="250" step="10" value="130">
+          </div>
+
+          <div class="calc-row">
+            <div class="calc-label-row">
+              <span>Mobile, Wi-Fi &amp; Sundry:</span>
+              <span id="lblOtherVal" style="color: var(--cyan-bright); font-weight: 800;">$120</span>
+            </div>
+            <input type="range" class="range-slider" id="calcOtherSlider" min="30" max="300" step="10" value="120">
+          </div>
+
+          <!-- Comparison Card -->
+          <div class="comparison-summary-card">
+            <div class="cost-column agent">
+              <div class="cost-col-title">Agent Brochure Quote</div>
+              <div class="cost-col-amount" id="costAgentClaim">$730/mo</div>
+              <span style="font-size: 0.72rem; color: var(--amber-warning); font-weight: 600;">(Rosy Estimate)</span>
+            </div>
+
+            <div class="cost-column real">
+              <div class="cost-col-title">Actual Ground Reality</div>
+              <div class="cost-col-amount" id="costGroundReal" style="color: #fca5a5;">$1,400/mo</div>
+              <span style="font-size: 0.72rem; color: #fca5a5; font-weight: 600;">(Real Expenses)</span>
+            </div>
+          </div>
+
+          <div id="costGapNotice" style="margin-top: 14px; padding: 10px; background: rgba(239, 68, 68, 0.15); border-radius: var(--radius-sm); font-size: 0.8rem; color: #fca5a5; text-align: center; font-weight: 700;">
+            ⚠️ Hidden Monthly Deficit: $670 not mentioned in agent brochures!
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         VIEW 5: Verified Senior Mentors Directory (Privacy-Guaranteed)
+         ==================================================================== -->
+    <section class="tab-view-content" id="view-seniors">
+      <div class="senior-directory-hero">
+        <div class="senior-directory-meta">
+          <span class="directory-pill"><i class="fa-solid fa-shield-halved"></i> 100% ID Privacy Guaranteed</span>
+          <h2 class="directory-title">Find Verified Seniors by Country or Course</h2>
+          <p class="directory-desc">
+            Filter currently enrolled seniors by their target destination or specific course of study. Only anonymous <strong>@usernames</strong>, verified <strong>colleges</strong>, <strong>courses</strong>, and <strong>locations</strong> are displayed to protect students from consultant retaliation. Message any senior directly without sharing phone numbers!
+          </p>
+        </div>
+
+        <!-- Filter Controls Bar -->
+        <div class="senior-filter-box">
+          <div class="senior-filter-row">
+            <div class="senior-filter-field">
+              <label class="form-label" for="seniorCountryFilter"><i class="fa-solid fa-globe"></i> Filter by Country:</label>
+              <select class="form-select" id="seniorCountryFilter">
+                <option value="All">🌐 All Global Destinations (Worldwide)</option>
+                <option value="Canada">🇨🇦 Canada</option>
+                <option value="UK">🇬🇧 United Kingdom</option>
+                <option value="USA">🇺🇸 United States</option>
+                <option value="Australia">🇦🇺 Australia</option>
+                <option value="Germany">🇩🇪 Germany</option>
+                <option value="Ireland">🇮🇪 Ireland</option>
+                <option value="France">🇫🇷 France</option>
+                <option value="Netherlands">🇳🇱 Netherlands</option>
+                <option value="Sweden">🇸🇪 Sweden</option>
+                <option value="New Zealand">🇳🇿 New Zealand</option>
+                <option value="Singapore">🇸🇬 Singapore</option>
+                <option value="Italy">🇮🇹 Italy</option>
+                <option value="Spain">🇪🇸 Spain</option>
+                <option value="Switzerland">🇨🇭 Switzerland</option>
+                <option value="UAE">🇦🇪 UAE / Dubai</option>
+                <option value="Japan">🇯🇵 Japan</option>
+                <option value="South Korea">🇰🇷 South Korea</option>
+                <option value="Poland">🇵🇱 Poland</option>
+                <option value="Finland">🇫🇮 Finland</option>
+                <option value="Norway">🇳🇴 Norway</option>
+                <option value="Denmark">🇩🇰 Denmark</option>
+                <option value="Malaysia">🇲🇾 Malaysia</option>
+                <option value="Austria">🇦🇹 Austria</option>
+                <option value="Belgium">🇧🇪 Belgium</option>
+                <option value="Czech Republic">🇨🇿 Czech Republic</option>
+                <option value="Hungary">🇭🇺 Hungary</option>
+                <option value="Cyprus">🇨🇾 Cyprus</option>
+                <option value="Malta">🇲🇹 Malta</option>
+                <option value="Lithuania">🇱🇹 Lithuania</option>
+                <option value="Latvia">🇱🇻 Latvia</option>
+                <option value="Estonia">🇪🇪 Estonia</option>
+                <option value="Georgia">🇬🇪 Georgia</option>
+                <option value="Philippines">🇵🇭 Philippines</option>
+                <option value="Other">🌍 Other Global Destination</option>
+              </select>
+            </div>
+
+            <div class="senior-filter-field">
+              <label class="form-label" for="seniorCourseFilter"><i class="fa-solid fa-graduation-cap"></i> Filter by Course / Program:</label>
+              <select class="form-select" id="seniorCourseFilter">
+                <option value="All">🎓 All Courses &amp; Programs</option>
+                <option value="Computer Science">💻 Computer Science &amp; Software Systems</option>
+                <option value="Data Analytics">📊 Data Analytics, AI &amp; FinTech</option>
+                <option value="Cloud Computing">☁️ Cloud Computing &amp; DevOps</option>
+                <option value="Business">📈 Business Administration &amp; Management</option>
+                <option value="Information Technology">🛡️ IT &amp; Cyber Security</option>
+                <option value="Engineering">⚙️ Engineering (Robotics, Systems, Mechanical)</option>
+                <option value="Healthcare">🩺 Healthcare, Nursing &amp; Public Health</option>
+                <option value="Finance">💳 Finance &amp; Financial Technology</option>
+              </select>
+            </div>
+
+            <div class="senior-filter-field search-field-col">
+              <label class="form-label" for="seniorSearchKeyword"><i class="fa-solid fa-magnifying-glass"></i> Search Senior Details:</label>
+              <input type="text" class="form-input" id="seniorSearchKeyword" placeholder="Search by college, city, course, or @username...">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Matched Senior Grid -->
+      <div class="seniors-grid" id="seniorsGrid">
+        <!-- Rendered dynamically with ONLY username, college, course, and place -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ====================================================================
+       MODAL 1: Submit Agency Review
+       ==================================================================== -->
+  <div class="modal-overlay" id="modalSubmitReview" role="dialog" aria-modal="true">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class="fa-solid fa-shield-halved" style="color: var(--cyan-bright);"></i>
+          Submit Agency Review (Wall of Truth)
+        </h3>
+        <button class="modal-close-btn modal-close-trigger">&times;</button>
+      </div>
+
+      <form id="formAgencyReview">
+        <div class="modal-body">
+          <div class="form-row-2">
+            <div class="form-field">
+              <label class="form-label" for="formAgencyName">Agency / Consultant Name *</label>
+              <input type="text" class="form-input" id="formAgencyName" required placeholder="e.g. IDP, Apex, Canam, Y-Axis">
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="formBranchCity">Branch City *</label>
+              <input type="text" class="form-input" id="formBranchCity" required placeholder="e.g. Sector 17 Chandigarh, Bangalore">
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-field">
+              <label class="form-label" for="formDestCountry">Destination Country *</label>
+              <select class="form-select" id="formDestCountry">
+                <option value="Canada">🇨🇦 Canada</option>
+                <option value="UK">🇬🇧 United Kingdom</option>
+                <option value="USA">🇺🇸 United States</option>
+                <option value="Australia">🇦🇺 Australia</option>
+                <option value="Germany">🇩🇪 Germany</option>
+                <option value="Ireland">🇮🇪 Ireland</option>
+                <option value="France">🇫🇷 France</option>
+                <option value="Netherlands">🇳🇱 Netherlands</option>
+                <option value="Sweden">🇸🇪 Sweden</option>
+                <option value="New Zealand">🇳🇿 New Zealand</option>
+                <option value="Singapore">🇸🇬 Singapore</option>
+                <option value="Italy">🇮🇹 Italy</option>
+                <option value="Spain">🇪🇸 Spain</option>
+                <option value="Switzerland">🇨🇭 Switzerland</option>
+                <option value="UAE">🇦🇪 UAE / Dubai</option>
+                <option value="Japan">🇯🇵 Japan</option>
+                <option value="South Korea">🇰🇷 South Korea</option>
+                <option value="Poland">🇵🇱 Poland</option>
+                <option value="Finland">🇫🇮 Finland</option>
+                <option value="Norway">🇳🇴 Norway</option>
+                <option value="Denmark">🇩🇰 Denmark</option>
+                <option value="Malaysia">🇲🇾 Malaysia</option>
+                <option value="Austria">🇦🇹 Austria</option>
+                <option value="Belgium">🇧🇪 Belgium</option>
+                <option value="Czech Republic">🇨🇿 Czech Republic</option>
+                <option value="Hungary">🇭🇺 Hungary</option>
+                <option value="Cyprus">🇨🇾 Cyprus</option>
+                <option value="Malta">🇲🇹 Malta</option>
+                <option value="Lithuania">🇱🇹 Lithuania</option>
+                <option value="Latvia">🇱🇻 Latvia</option>
+                <option value="Estonia">🇪🇪 Estonia</option>
+                <option value="Georgia">🇬🇪 Georgia</option>
+                <option value="Philippines">🇵🇭 Philippines</option>
+                <option value="Other">🌍 Other Global Destination</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="formRating">Honest Rating (1 = Scam / Terrible, 5 = Great) *</label>
+              <select class="form-select" id="formRating">
+                <option value="1">1 Star - Malpractice / Lies / Terrible</option>
+                <option value="2">2 Stars - Pushed Unwanted College</option>
+                <option value="3">3 Stars - Average / Slow</option>
+                <option value="4">4 Stars - Good / Transparent</option>
+                <option value="5">5 Stars - Outstanding / Highly Recommended</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="formTreatmentSummary">Summary Headline: How did they treat you? *</label>
+            <input type="text" class="form-input" id="formTreatmentSummary" required placeholder="e.g. Withheld my passport and took 1 lakh file fee">
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="formPromised">What did the agent promise you or your parents?</label>
+            <textarea class="form-textarea" id="formPromised" rows="2" placeholder="e.g. Promised guaranteed part-time job and PR within 1 year"></textarea>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="formActuallyHappened">What actually happened in reality?</label>
+            <textarea class="form-textarea" id="formActuallyHappened" rows="2" placeholder="e.g. College was not eligible for PGWP; jobs were non-existent"></textarea>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-field">
+              <label class="form-label" for="formHiddenCharges">Hidden Fees / Charges Taken (if any)</label>
+              <input type="text" class="form-input" id="formHiddenCharges" placeholder="e.g. ₹80,000 file opening fee">
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="formThreats">Did they threaten or pressure you?</label>
+              <input type="text" class="form-input" id="formThreats" placeholder="e.g. Threatened to cancel visa file">
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 700; color: var(--cyan-bright);">
+              <input type="checkbox" id="formIsAnonymous" checked style="accent-color: var(--cyan-primary); width: 18px; height: 18px;">
+              Post Anonymously (Hide my real name to prevent consultant retaliation)
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary modal-close-trigger">Cancel</button>
+          <button type="submit" class="btn-primary">
+            <i class="fa-solid fa-check"></i> Publish Review to Supabase
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       MODAL 2: User Profile / Join Club (No phone numbers)
+       ==================================================================== -->
+  <div class="modal-overlay" id="modalUserProfile" role="dialog" aria-modal="true">
+    <div class="modal-window" style="max-width: 560px;">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class="fa-solid fa-user-shield" style="color: var(--cyan-bright);"></i>
+          Your Student Profile &amp; Privacy Controls
+        </h3>
+        <button class="modal-close-btn modal-close-trigger">&times;</button>
+      </div>
+
+      <form id="formUserProfile">
+        <div class="modal-body" style="padding: 22px 24px; gap: 16px;">
+          
+          <!-- Data Storage & Privacy Trust Notice -->
+          <div class="data-storage-trust-banner">
+            <div class="trust-banner-icon"><i class="fa-solid fa-shield-halved"></i></div>
+            <div class="trust-banner-text">
+              <strong>Your Data Is 100% Secure &amp; Protected:</strong>
+              <span>Raw Google accounts, identity proofs, and private mobile numbers are sealed in the encrypted Administrator Vault. Only your chosen public details are visible to other students.</span>
+            </div>
+          </div>
+
+          <!-- Profile Photo / Avatar Management Section -->
+          <div class="profile-photo-management-section">
+            <label class="form-label">
+              <i class="fa-solid fa-camera-retro" style="color: var(--cyan-bright);"></i> Profile Photo / Avatar
+            </label>
+            <div class="profile-photo-flex-row">
+              <div class="profile-avatar-preview-wrap">
+                <img id="userProfileAvatarImg" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150" alt="Avatar Preview" class="profile-avatar-preview-img">
+                <button type="button" class="btn-avatar-cam-badge" onclick="document.getElementById('inputProfileAvatarFile').click()" title="Choose photo from device">
+                  <i class="fa-solid fa-camera"></i>
+                </button>
+              </div>
+              <div class="profile-avatar-controls">
+                <input type="file" id="inputProfileAvatarFile" accept="image/*" style="display: none;">
+                <div style="display: flex; gap: 8px;">
+                  <button type="button" class="btn-secondary btn-upload-photo" onclick="document.getElementById('inputProfileAvatarFile').click()">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> Upload Photo
+                  </button>
+                  <button type="button" class="btn-secondary btn-upload-photo" onclick="window.pickProfileAvatarPreset('https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150')" title="Reset to default">
+                    <i class="fa-solid fa-rotate-left"></i> Default
+                  </button>
+                </div>
+                <input type="url" class="form-input" id="inputProfileAvatarUrl" placeholder="Or paste direct image URL (https://...)" style="font-size: 0.8rem; padding: 8px 12px;">
+              </div>
+            </div>
+
+            <!-- Quick Student Avatar Presets -->
+            <div class="avatar-presets-strip">
+              <span class="avatar-presets-label">Quick Avatar Presets:</span>
+              <div class="avatar-presets-grid">
+                <button type="button" class="btn-avatar-preset" onclick="window.pickProfileAvatarPreset('https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150')" title="Student Avatar 1">
+                  <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150" alt="Preset 1">
+                </button>
+                <button type="button" class="btn-avatar-preset" onclick="window.pickProfileAvatarPreset('https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150')" title="Student Avatar 2">
+                  <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150" alt="Preset 2">
+                </button>
+                <button type="button" class="btn-avatar-preset" onclick="window.pickProfileAvatarPreset('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150')" title="Student Avatar 3">
+                  <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150" alt="Preset 3">
+                </button>
+                <button type="button" class="btn-avatar-preset" onclick="window.pickProfileAvatarPreset('https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150')" title="Student Avatar 4">
+                  <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150" alt="Preset 4">
+                </button>
+                <button type="button" class="btn-avatar-preset" onclick="window.pickProfileAvatarPreset('https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150')" title="Student Avatar 5">
+                  <img src="https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150" alt="Preset 5">
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Handle / Username & Display Name -->
+          <div class="form-row-2">
+            <div class="form-field">
+              <label class="form-label" for="inputUsername">Public Username / Alias *</label>
+              <div style="position: relative;">
+                <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--cyan-bright); font-weight: 700;">@</span>
+                <input type="text" class="form-input" id="inputUsername" required placeholder="student_alias" style="padding-left: 28px;">
+              </div>
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="inputDisplayName">Display Name</label>
+              <input type="text" class="form-input" id="inputDisplayName" placeholder="e.g. Rahul Sharma">
+            </div>
+          </div>
+
+          <!-- Destination & Role -->
+          <div class="form-row-2">
+            <div class="form-field">
+              <label class="form-label" for="inputTargetCountry">Destination Country</label>
+              <select class="form-select" id="inputTargetCountry">
+                <option value="Canada">🇨🇦 Canada</option>
+                <option value="UK">🇬🇧 United Kingdom</option>
+                <option value="USA">🇺🇸 United States</option>
+                <option value="Australia">🇦🇺 Australia</option>
+                <option value="Germany">🇩🇪 Germany</option>
+                <option value="Ireland">🇮🇪 Ireland</option>
+                <option value="France">🇫🇷 France</option>
+                <option value="Netherlands">🇳🇱 Netherlands</option>
+                <option value="Sweden">🇸🇪 Sweden</option>
+                <option value="New Zealand">🇳🇿 New Zealand</option>
+                <option value="Singapore">🇸🇬 Singapore</option>
+                <option value="Italy">🇮🇹 Italy</option>
+                <option value="Spain">🇪🇸 Spain</option>
+                <option value="Switzerland">🇨🇭 Switzerland</option>
+                <option value="UAE">🇦🇪 UAE / Dubai</option>
+                <option value="Japan">🇯🇵 Japan</option>
+                <option value="South Korea">🇰🇷 South Korea</option>
+                <option value="Poland">🇵🇱 Poland</option>
+                <option value="Finland">🇫🇮 Finland</option>
+                <option value="Norway">🇳🇴 Norway</option>
+                <option value="Denmark">🇩🇰 Denmark</option>
+                <option value="Malaysia">🇲🇾 Malaysia</option>
+                <option value="Austria">🇦🇹 Austria</option>
+                <option value="Belgium">🇧🇪 Belgium</option>
+                <option value="Czech Republic">🇨🇿 Czech Republic</option>
+                <option value="Hungary">🇭🇺 Hungary</option>
+                <option value="Cyprus">🇨🇾 Cyprus</option>
+                <option value="Malta">🇲🇹 Malta</option>
+                <option value="Lithuania">🇱🇹 Lithuania</option>
+                <option value="Latvia">🇱🇻 Latvia</option>
+                <option value="Estonia">🇪🇪 Estonia</option>
+                <option value="Georgia">🇬🇪 Georgia</option>
+                <option value="Philippines">🇵🇭 Philippines</option>
+                <option value="Other">🌍 Other Global Destination</option>
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label class="form-label" for="inputUserRole">I am a:</label>
+              <select class="form-select" id="inputUserRole">
+                <option value="senior_student">Senior Student (Currently abroad / Alumni)</option>
+                <option value="aspirant">New Aspirant (Planning to study abroad)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- College, Course, and Place (City) -->
+          <div class="form-row-2">
+            <div class="form-field">
+              <label class="form-label" for="inputUserCollege">College / University</label>
+              <input type="text" class="form-input" id="inputUserCollege" placeholder="e.g. York University / Langara College">
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="inputUserPlace">Campus City &amp; Area</label>
+              <input type="text" class="form-input" id="inputUserPlace" placeholder="e.g. Toronto, ON / London (Zone 2)">
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="inputUserCourse">Degree / Course Program</label>
+            <input type="text" class="form-input" id="inputUserCourse" placeholder="e.g. MS Computer Science / Post-Grad Cloud Computing">
+          </div>
+
+          <!-- Mobile Number & Public Privacy Opt-In Card -->
+          <div class="profile-mobile-privacy-box">
+            <div class="privacy-box-header">
+              <div class="privacy-box-title">
+                <i class="fa-solid fa-phone-volume" style="color: var(--cyan-bright);"></i>
+                <span>Mobile Number / WhatsApp</span>
+              </div>
+              <span class="privacy-status-badge private" id="badgePhonePrivacyStatus">
+                <i class="fa-solid fa-lock"></i> Strictly Private
+              </span>
+            </div>
+
+            <div class="form-field" style="margin-bottom: 10px;">
+              <div style="position: relative;">
+                <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted);"><i class="fa-solid fa-phone"></i></span>
+                <input type="tel" class="form-input" id="inputUserMobile" placeholder="e.g. +1 (416) 555-0192 or +91 98765 43210" style="padding-left: 34px;">
+              </div>
+              <span style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-top: 4px;">
+                Optional. Stored securely in Confidential Vault. Other students or agents will never see it unless you explicitly toggle public sharing below.
+              </span>
+            </div>
+
+            <!-- Opt-In Public Sharing Toggle Card -->
+            <div class="privacy-toggle-card">
+              <label class="privacy-toggle-label" for="checkSharePhonePublicly">
+                <input type="checkbox" id="checkSharePhonePublicly" onchange="window.handlePhonePrivacyToggle()">
+                <span class="toggle-slider"></span>
+                <div class="toggle-text-wrap">
+                  <strong id="togglePhonePrivacyTitle">🔒 Share Mobile Number Publicly on AbroadShield</strong>
+                  <span id="togglePhonePrivacyDesc">OFF by default. Turn ON only if you want students to view your number and reach you directly on WhatsApp.</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="modal-footer" style="justify-content: space-between;">
+          <div>
+            <button type="button" class="btn-danger" style="padding: 8px 14px; font-size: 0.8rem;" onclick="window.handleSignOut()">
+              <i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out
+            </button>
+            <button type="button" class="btn-secondary" style="padding: 8px 14px; font-size: 0.8rem; margin-left: 6px;" onclick="window.reopenOnboardingWizard()">
+              <i class="fa-solid fa-id-card-clip"></i> Verification Gate
+            </button>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button type="button" class="btn-secondary modal-close-trigger">Close</button>
+            <button type="submit" class="btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save Profile</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       MODAL 3: Submit New Question / Story
+       ==================================================================== -->
+  <div class="modal-overlay" id="modalSubmitPost" role="dialog" aria-modal="true">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class="fa-solid fa-pen-nib" style="color: var(--cyan-bright);"></i>
+          Ask Seniors / Share Ground Experience
+        </h3>
+        <button class="modal-close-btn modal-close-trigger">&times;</button>
+      </div>
+
+      <form id="formNewPost">
+        <div class="modal-body">
+          <div class="form-field">
+            <label class="form-label" for="inputPostTitle">Question Title *</label>
+            <input type="text" class="form-input" id="inputPostTitle" required placeholder="e.g. Is Lambton College safe under the new 2025 PGWP rules?">
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-field">
+              <label class="form-label" for="inputPostCountry">Country *</label>
+              <select class="form-select" id="inputPostCountry">
+                <option value="Canada">🇨🇦 Canada</option>
+                <option value="UK">🇬🇧 United Kingdom</option>
+                <option value="USA">🇺🇸 United States</option>
+                <option value="Australia">🇦🇺 Australia</option>
+                <option value="Germany">🇩🇪 Germany</option>
+                <option value="Ireland">🇮🇪 Ireland</option>
+                <option value="France">🇫🇷 France</option>
+                <option value="Netherlands">🇳🇱 Netherlands</option>
+                <option value="Sweden">🇸🇪 Sweden</option>
+                <option value="New Zealand">🇳🇿 New Zealand</option>
+                <option value="Singapore">🇸🇬 Singapore</option>
+                <option value="Italy">🇮🇹 Italy</option>
+                <option value="Spain">🇪🇸 Spain</option>
+                <option value="Switzerland">🇨🇭 Switzerland</option>
+                <option value="UAE">🇦🇪 UAE / Dubai</option>
+                <option value="Japan">🇯🇵 Japan</option>
+                <option value="South Korea">🇰🇷 South Korea</option>
+                <option value="Poland">🇵🇱 Poland</option>
+                <option value="Finland">🇫🇮 Finland</option>
+                <option value="Norway">🇳🇴 Norway</option>
+                <option value="Denmark">🇩🇰 Denmark</option>
+                <option value="Malaysia">🇲🇾 Malaysia</option>
+                <option value="Austria">🇦🇹 Austria</option>
+                <option value="Belgium">🇧🇪 Belgium</option>
+                <option value="Czech Republic">🇨🇿 Czech Republic</option>
+                <option value="Hungary">🇭🇺 Hungary</option>
+                <option value="Cyprus">🇨🇾 Cyprus</option>
+                <option value="Malta">🇲🇹 Malta</option>
+                <option value="Lithuania">🇱🇹 Lithuania</option>
+                <option value="Latvia">🇱🇻 Latvia</option>
+                <option value="Estonia">🇪🇪 Estonia</option>
+                <option value="Georgia">🇬🇪 Georgia</option>
+                <option value="Philippines">🇵🇭 Philippines</option>
+                <option value="Other">🌍 Other Global Destination</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="inputPostCategory">Category *</label>
+              <select class="form-select" id="inputPostCategory">
+                <option value="Agent Truth & Scams">Agent Truth &amp; Scams</option>
+                <option value="Living Expenses & Rent">Living Expenses &amp; Rent</option>
+                <option value="Part-Time Jobs">Part-Time Jobs</option>
+                <option value="Visa & PGWP Rules">Visa &amp; PGWP Rules</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="inputPostContent">Detailed Question or Experience *</label>
+            <textarea class="form-textarea" id="inputPostContent" rows="4" required placeholder="Describe your situation or what your consultant told you..."></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary modal-close-trigger">Cancel</button>
+          <button type="submit" class="btn-primary">Post to Club Feed</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       MODAL 4: Google Authentication Modal
+       ==================================================================== -->
+  <div class="modal-overlay" id="modalGoogleAuth" role="dialog" aria-modal="true">
+    <div class="google-auth-card">
+      <svg class="g-logo-lg" viewBox="0 0 24 24">
+        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+      </svg>
+      <h3>Sign in with Google</h3>
+      <p>Choose your Google account to connect to AbroadShield. No phone numbers or WhatsApp are shared.</p>
+
+      <div class="google-account-list">
+        <!-- One-click Google Student Accounts -->
+        <div class="google-account-item" onclick="window.handleGoogleLoginSelect('Aarav Sharma', 'aarav.sharma2025@gmail.com', 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150')">
+          <img class="google-acc-avatar" src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150" alt="Aarav">
+          <div class="google-acc-info">
+            <span class="google-acc-name">Aarav Sharma</span>
+            <span class="google-acc-email">aarav.sharma2025@gmail.com</span>
+          </div>
+        </div>
+
+        <div class="google-account-item" onclick="window.handleGoogleLoginSelect('Ananya Iyer', 'ananya.iyer.uk@gmail.com', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150')">
+          <img class="google-acc-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150" alt="Ananya">
+          <div class="google-acc-info">
+            <span class="google-acc-name">Ananya Iyer</span>
+            <span class="google-acc-email">ananya.iyer.uk@gmail.com</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="border-top: 1px solid #e2e8f0; padding-top: 14px; margin-top: 10px;">
+        <span style="font-size: 0.75rem; color: #94a3b8; display: block; margin-bottom: 8px;">Or sign in with custom Google details:</span>
+        <input type="text" id="customGoogleName" placeholder="Your Name" style="width: 100%; padding: 8px 12px; margin-bottom: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem;">
+        <input type="email" id="customGoogleEmail" placeholder="student@gmail.com" style="width: 100%; padding: 8px 12px; margin-bottom: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem;">
+        <button class="btn-primary" style="width: 100%; justify-content: center;" onclick="window.handleCustomGoogleLogin()">
+          <i class="fa-solid fa-arrow-right"></i> Continue with this Google Account
+        </button>
+      </div>
+
+      <div style="margin-top: 16px;">
+        <button type="button" class="btn-secondary modal-close-trigger" style="color: #64748b; font-size: 0.8rem; padding: 6px 14px;">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       MODAL 5: Multi-Step Student Questionnaire Wizard (Triggered on Google Login)
+       ==================================================================== -->
+  <div class="modal-overlay" id="modalStudentOnboarding" role="dialog" aria-modal="true">
+    <div class="modal-window wizard-modal-window">
+      
+      <!-- Progress Bar Header with Close/Cancel Button -->
+      <div class="wizard-progress-header">
+        <div class="wizard-step-info">
+          <span class="wizard-step-title" id="onboardStepTitle">Step 1: Your Study Abroad Status</span>
+          <span class="wizard-step-count" id="onboardStepCount">Step 1 of 4</span>
+        </div>
+        <button type="button" class="wizard-close-btn" onclick="window.closeOnboardingModal()" title="Cancel &amp; Explore First">&times;</button>
+        <div class="wizard-progress-track">
+          <div class="wizard-progress-fill" id="onboardProgressFill" style="width: 25%;"></div>
+        </div>
+      </div>
+
+      <form id="formStudentOnboarding">
+        <div class="modal-body" style="padding: 24px;">
+
+          <!-- STEP 1: Status & Country (Common to all) -->
+          <div class="wizard-step-content active" id="wizardStep1">
+            <h3 style="font-family: var(--font-display); font-size: 1.3rem; margin-bottom: 6px;">
+              Welcome, <span id="onboardGreetingName" style="color: var(--cyan-bright);">Student</span>!
+            </h3>
+            <p style="color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 20px;">
+              Are you currently studying abroad, or are you planning to go? Choose your status to customize your experience.
+            </p>
+
+            <label class="form-label">Are you studying abroad or planning to study?</label>
+            <div class="role-choice-grid">
+              <div class="role-card-btn selected" id="cardChooseSenior" onclick="window.selectOnboardingRole('senior_student')">
+                <div class="role-icon-bubble">
+                  <i class="fa-solid fa-user-graduate"></i>
+                </div>
+                <div class="role-title">I'm Already Studying Abroad</div>
+                <div class="role-desc">I am enrolled in college/university abroad. I want to review my agent, share real costs, and help incoming students.</div>
+              </div>
+
+              <div class="role-card-btn" id="cardChooseAspirant" onclick="window.selectOnboardingRole('aspirant')">
+                <div class="role-icon-bubble">
+                  <i class="fa-solid fa-plane-departure"></i>
+                </div>
+                <div class="role-title">I Want to Study Abroad</div>
+                <div class="role-desc">I am an upcoming student planning my intake. I want to ask questions and avoid scam agents.</div>
+              </div>
+            </div>
+
+            <!-- Choose Desired Public Username / Anonymous Alias -->
+            <div class="username-picker-card" style="margin-top: 18px;">
+              <div class="username-picker-header">
+                <div class="username-picker-title">
+                  <i class="fa-solid fa-user-secret" style="color: var(--cyan-bright);"></i>
+                  <span>Choose Your Public Username / Alias</span>
+                </div>
+                <span class="privacy-guarantee-tag"><i class="fa-solid fa-shield-halved"></i> 100% ID Privacy Guaranteed</span>
+              </div>
+              <p class="username-picker-sub">
+                Your real Google name, email, Date of Birth, and Student ID are <strong>strictly confidential</strong> and securely sealed for platform administrators only. No agent or outside user can ever see your private ID. Choose any anonymous username you like for posting and community chats:
+              </p>
+
+              <div class="form-field" style="margin-top: 12px;">
+                <label class="form-label" for="customDesiredUsername">Which name do you like for your public username? *</label>
+                <div class="custom-username-input-wrap">
+                  <span class="username-prefix">@</span>
+                  <input type="text" class="form-input" id="customDesiredUsername" placeholder="e.g. wander_scholar, tech_maple, aero_aspirant" maxlength="25" required>
+                </div>
+                <div class="username-preview-bar">
+                  <span>Public Alias Preview:</span>
+                  <span class="user-handle-preview" id="usernamePreviewBadge">@student_alias</span>
+                  <span class="alias-safe-badge"><i class="fa-solid fa-lock"></i> Real Identity Hidden</span>
+                </div>
+                <div class="username-suggestion-row">
+                  <span style="font-size: 0.74rem; color: var(--text-muted);">Quick aliases:</span>
+                  <button type="button" class="btn-alias-chip" onclick="window.pickSuggestedUsername('canada_scholar')">@canada_scholar</button>
+                  <button type="button" class="btn-alias-chip" onclick="window.pickSuggestedUsername('shield_mentor')">@shield_mentor</button>
+                  <button type="button" class="btn-alias-chip" onclick="window.pickSuggestedUsername('global_voyager')">@global_voyager</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Country Selection with Auto Student Calculation -->
+            <div class="form-field" style="margin-top: 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <label class="form-label" for="onboardCountrySelect" style="margin-bottom: 0;">Which Country are you studying in or planning to study? *</label>
+                <span class="live-calc-badge" id="onboardCountryCounterPreview">
+                  <i class="fa-solid fa-graduation-cap"></i> <span id="onboardSelectedCountryCount">248</span> students registered
+                </span>
+              </div>
+              <select class="form-select" id="onboardCountrySelect">
+                <option value="Canada">🇨🇦 Canada (248 Active Students)</option>
+                <option value="UK">🇬🇧 United Kingdom (182 Active Students)</option>
+                <option value="USA">🇺🇸 United States (135 Active Students)</option>
+                <option value="Australia">🇦🇺 Australia (98 Active Students)</option>
+                <option value="Germany">🇩🇪 Germany (129 Active Students)</option>
+                <option value="Ireland">🇮🇪 Ireland (64 Active Students)</option>
+                <option value="France">🇫🇷 France (52 Active Students)</option>
+                <option value="Netherlands">🇳🇱 Netherlands (41 Active Students)</option>
+                <option value="Sweden">🇸🇪 Sweden (28 Active Students)</option>
+                <option value="New Zealand">🇳🇿 New Zealand (47 Active Students)</option>
+                <option value="Singapore">🇸🇬 Singapore (33 Active Students)</option>
+                <option value="Italy">🇮🇹 Italy (36 Active Students)</option>
+                <option value="Spain">🇪🇸 Spain (25 Active Students)</option>
+                <option value="Switzerland">🇨🇭 Switzerland (19 Active Students)</option>
+                <option value="UAE">🇦🇪 UAE / Dubai (44 Active Students)</option>
+                <option value="Japan">🇯🇵 Japan (22 Active Students)</option>
+                <option value="South Korea">🇰🇷 South Korea (18 Active Students)</option>
+                <option value="Poland">🇵🇱 Poland (31 Active Students)</option>
+                <option value="Finland">🇫🇮 Finland (15 Active Students)</option>
+                <option value="Norway">🇳🇴 Norway (12 Active Students)</option>
+                <option value="Denmark">🇩🇰 Denmark (14 Active Students)</option>
+                <option value="Malaysia">🇲🇾 Malaysia (26 Active Students)</option>
+                <option value="Austria">🇦🇹 Austria (16 Active Students)</option>
+                <option value="Belgium">🇧🇪 Belgium (13 Active Students)</option>
+                <option value="Czech Republic">🇨🇿 Czech Republic (17 Active Students)</option>
+                <option value="Hungary">🇭🇺 Hungary (19 Active Students)</option>
+                <option value="Cyprus">🇨🇾 Cyprus (21 Active Students)</option>
+                <option value="Malta">🇲🇹 Malta (11 Active Students)</option>
+                <option value="Lithuania">🇱🇹 Lithuania (10 Active Students)</option>
+                <option value="Latvia">🇱🇻 Latvia (9 Active Students)</option>
+                <option value="Estonia">🇪🇪 Estonia (8 Active Students)</option>
+                <option value="Georgia">🇬🇪 Georgia (14 Active Students)</option>
+                <option value="Philippines">🇵🇭 Philippines (12 Active Students)</option>
+                <option value="Other">🌍 Other Global Destination</option>
+              </select>
+            </div>
+
+            <!-- Student Identity Verification & Admin ID Seal -->
+            <div class="security-gate-card" style="margin-top: 20px;">
+              <div class="security-gate-title">
+                <i class="fa-solid fa-shield-halved"></i>
+                Student Identity &amp; Verification Protocol
+              </div>
+              <div class="security-gate-sub">
+                To protect students from commercial sales agents and unauthorized solicitors, please verify your student enrollment. Real credentials are strictly encrypted and accessible <strong>ONLY to platform administrators</strong>.
+              </div>
+
+              <div class="form-row-2">
+                <div class="form-field">
+                  <label class="form-label" for="studentDobInput">Date of Birth (DOB) *</label>
+                  <input type="date" class="form-input" id="studentDobInput" required>
+                  <div id="studentAgeFeedback" class="age-status-pill valid" style="display: none;">
+                    <i class="fa-solid fa-circle-check"></i> <span id="studentAgeText">Student Eligibility Verified ✅</span>
+                  </div>
+                </div>
+
+                <div class="form-field">
+                  <label class="form-label" for="studentProofType">Student Proof Type *</label>
+                  <select class="form-select" id="studentProofType">
+                    <option value="student_id">College / University Student ID Card</option>
+                    <option value="enrollment_number">Admission Offer / Enrollment Roll No.</option>
+                    <option value="edu_email">Institutional Student Email (.edu / .ca / .ac.uk)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-field" style="margin-top: 10px;">
+                <label class="form-label" for="studentProofValue">Student ID Number / Institutional Email *</label>
+                <input type="text" class="form-input" id="studentProofValue" placeholder="e.g. STU-2023-9841 or student@yorku.ca" required>
+                <span style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-top: 4px;">
+                  🔒 Kept 100% confidential. Stored in Administrator Vault only. Never displayed on your public profile.
+                </span>
+              </div>
+
+              <div class="anti-agent-oath-card">
+                <label>
+                  <input type="checkbox" id="antiAgentOathCheck" required>
+                  <span><strong>Strict Anti-Agent Oath:</strong> I legally declare under penalty of permanent hardware blacklist that I am a genuine student or aspirant. I am <strong>NOT</strong> an education consultant, visa agent, marketer, sub-agent, or agency employee.</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 2A (Senior): University & Environment of Area -->
+          <div class="wizard-step-content" id="wizardStep2Senior">
+            <h3 style="font-family: var(--font-display); font-size: 1.25rem; margin-bottom: 6px;">
+              <i class="fa-solid fa-tree-city" style="color: var(--cyan-bright);"></i>
+              Environment &amp; Area Reality
+            </h3>
+            <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 18px;">
+              Help new students know what it is actually like to live in your city.
+            </p>
+
+            <div class="form-row-2">
+              <div class="form-field">
+                <label class="form-label" for="onboardUni">Current College / University *</label>
+                <input type="text" class="form-input" id="onboardUni" placeholder="e.g. York University / Langara College">
+              </div>
+              <div class="form-field">
+                <label class="form-label" for="onboardCity">City &amp; Area *</label>
+                <input type="text" class="form-input" id="onboardCity" placeholder="e.g. Toronto (North York) / London (Zone 2)">
+              </div>
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-field">
+                <label class="form-label" for="onboardCourse">Degree / Course Program *</label>
+                <input type="text" class="form-input" id="onboardCourse" placeholder="e.g. MS Computer Science &amp; Software Systems">
+              </div>
+              <div class="form-field">
+                <label class="form-label" for="onboardIntake">Intake Year</label>
+                <input type="text" class="form-input" id="onboardIntake" placeholder="e.g. Fall 2023 or Winter 2024">
+              </div>
+            </div>
+
+            <div class="env-rating-grid" style="margin-top: 10px;">
+              <div class="env-rating-card">
+                <div class="env-card-title">
+                  <i class="fa-solid fa-shield-halved" style="color: var(--emerald-safe);"></i>
+                  Area Safety Rating
+                </div>
+                <div class="star-rating-select" id="safetyStarRating">
+                  <i class="fa-solid fa-star selected" data-val="1"></i>
+                  <i class="fa-solid fa-star selected" data-val="2"></i>
+                  <i class="fa-solid fa-star selected" data-val="3"></i>
+                  <i class="fa-solid fa-star selected" data-val="4"></i>
+                  <i class="fa-regular fa-star" data-val="5"></i>
+                </div>
+                <span style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-top: 4px;">4/5 - Generally safe, be alert at night</span>
+              </div>
+
+              <div class="env-rating-card">
+                <div class="env-card-title">
+                  <i class="fa-solid fa-bus-simple" style="color: var(--cyan-bright);"></i>
+                  Public Transit Quality
+                </div>
+                <div class="star-rating-select" id="transitStarRating">
+                  <i class="fa-solid fa-star selected" data-val="1"></i>
+                  <i class="fa-solid fa-star selected" data-val="2"></i>
+                  <i class="fa-solid fa-star selected" data-val="3"></i>
+                  <i class="fa-solid fa-star selected" data-val="4"></i>
+                  <i class="fa-solid fa-star selected" data-val="5"></i>
+                </div>
+                <span style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-top: 4px;">5/5 - Frequent buses/metro connectivity</span>
+              </div>
+            </div>
+
+            <div class="form-field" style="margin-top: 14px;">
+              <label class="form-label">Part-Time Job Reality in your city:</label>
+              <div class="job-pill-group">
+                <button type="button" class="job-pill active" data-job="Extremely Scarce (2-3+ months struggle)">⚠️ Extremely Scarce (Takes 2-3+ months)</button>
+                <button type="button" class="job-pill" data-job="Moderate (Available with networking)">Moderate Opportunities</button>
+                <button type="button" class="job-pill" data-job="Plentiful / Easy">Plentiful / Easy</button>
+              </div>
+            </div>
+
+            <div class="form-field" style="margin-top: 14px;">
+              <label class="form-label" for="onboardEnvNotes">Weather, Indian Groceries &amp; Area Atmosphere:</label>
+              <textarea class="form-textarea" id="onboardEnvNotes" rows="2" placeholder="e.g. Winters hit -20°C with heavy snow; Indian grocery stores (Subzi Mandi) are available within 15 min bus ride."></textarea>
+            </div>
+          </div>
+
+          <!-- STEP 3 (Senior): Real Expenses -->
+          <div class="wizard-step-content" id="wizardStep3Senior">
+            <h3 style="font-family: var(--font-display); font-size: 1.25rem; margin-bottom: 6px;">
+              <i class="fa-solid fa-wallet" style="color: var(--amber-warning);"></i>
+              Real Monthly Expenses Breakdown
+            </h3>
+            <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 18px;">
+              Agents usually lie by telling parents that living costs are only $400-$500/month. What is your honest monthly expense?
+            </p>
+
+            <div class="form-row-2">
+              <div class="form-field">
+                <label class="form-label" for="onboardRent">Monthly Shared Rent ($/£/€) *</label>
+                <input type="number" class="form-input" id="onboardRent" value="850" placeholder="e.g. 850">
+              </div>
+              <div class="form-field">
+                <label class="form-label" for="onboardFood">Monthly Groceries ($/£/€) *</label>
+                <input type="number" class="form-input" id="onboardFood" value="250" placeholder="e.g. 250">
+              </div>
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-field">
+                <label class="form-label" for="onboardTransitFee">Monthly Transit Pass</label>
+                <input type="number" class="form-input" id="onboardTransitFee" value="130" placeholder="e.g. 130">
+              </div>
+              <div class="form-field">
+                <label class="form-label" for="onboardMiscFee">Mobile, Wi-Fi &amp; Sundry</label>
+                <input type="number" class="form-input" id="onboardMiscFee" value="80" placeholder="e.g. 80">
+              </div>
+            </div>
+
+            <div class="form-field" style="margin-top: 12px;">
+              <label class="form-label" for="onboardHiddenExpenses">Any unexpected fees agents hid from you?</label>
+              <input type="text" class="form-input" id="onboardHiddenExpenses" placeholder="e.g. Mandatory health insurance ($900/yr), textbook portal fees ($400)">
+            </div>
+          </div>
+
+          <!-- STEP 4 (Senior): Agent & Consultancy Feedback -->
+          <div class="wizard-step-content" id="wizardStep4Senior">
+            <h3 style="font-family: var(--font-display); font-size: 1.25rem; margin-bottom: 6px;">
+              <i class="fa-solid fa-shield-virus" style="color: var(--red-danger);"></i>
+              How Did Your Agent Treat You?
+            </h3>
+            <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 18px;">
+              Your feedback will be posted on the Wall of Truth to protect other students from being deceived.
+            </p>
+
+            <div class="form-row-2">
+              <div class="form-field">
+                <label class="form-label" for="onboardAgentName">Agent / Agency Used *</label>
+                <input type="text" class="form-input" id="onboardAgentName" placeholder="e.g. IDP, Apex, Canam, Punjab Overseas, or Self-Applied">
+              </div>
+              <div class="form-field">
+                <label class="form-label" for="onboardAgentCity">Agency City *</label>
+                <input type="text" class="form-input" id="onboardAgentCity" placeholder="e.g. Chandigarh, Hyderabad, Bangalore">
+              </div>
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-field">
+                <label class="form-label" for="onboardAgentRating">Overall Agent Rating</label>
+                <select class="form-select" id="onboardAgentRating">
+                  <option value="1">1 Star - Malpractice / False Claims</option>
+                  <option value="2">2 Stars - Pushed High-Commission College</option>
+                  <option value="3">3 Stars - Average Service</option>
+                  <option value="4">4 Stars - Transparent &amp; Helpful</option>
+                  <option value="5">5 Stars - Outstanding / Ethical</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label class="form-label" for="onboardHiddenCharge">Hidden Charges Taken</label>
+                <input type="text" class="form-input" id="onboardHiddenCharge" placeholder="e.g. ₹90,000 file opening fee">
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label class="form-label" for="onboardTreatment">How did they treat you? Any threats or document withholding?</label>
+              <textarea class="form-textarea" id="onboardTreatment" rows="2" placeholder="e.g. Refused to return my original 10th/12th marksheets until I paid 50k extra; pushed an unaccredited college."></textarea>
+            </div>
+
+            <div class="form-field">
+              <label class="form-label" for="onboardGoldenTip">Your #1 Golden Advice for Incoming Students:</label>
+              <textarea class="form-textarea" id="onboardGoldenTip" rows="2" placeholder="e.g. Always apply directly through university portals and never surrender original passports to any agent!"></textarea>
+            </div>
+          </div>
+
+          <!-- STEP 2B (Aspirant Flow): Goals & Concerns -->
+          <div class="wizard-step-content" id="wizardStep2Aspirant">
+            <h3 style="font-family: var(--font-display); font-size: 1.25rem; margin-bottom: 6px;">
+              <i class="fa-solid fa-compass" style="color: var(--cyan-bright);"></i>
+              Your Study Abroad Plan &amp; Doubts
+            </h3>
+            <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 18px;">
+              Tell us your target program so we can connect you with seniors in that field.
+            </p>
+
+            <div class="form-row-2">
+              <div class="form-field">
+                <label class="form-label" for="aspirantProgram">Target Degree / Program *</label>
+                <input type="text" class="form-input" id="aspirantProgram" placeholder="e.g. Master of Computer Science, PG Diploma in Business">
+              </div>
+              <div class="form-field">
+                <label class="form-label" for="aspirantIntake">Target Intake *</label>
+                <input type="text" class="form-input" id="aspirantIntake" placeholder="e.g. Fall 2025 or Winter 2026">
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label class="form-label" for="aspirantAgentSpoken">Have you spoken to an agent? Which consultancy?</label>
+              <input type="text" class="form-input" id="aspirantAgentSpoken" placeholder="e.g. Spoke to a local consultant in Delhi claiming 100% PR">
+            </div>
+
+            <div class="form-field">
+              <label class="form-label" for="aspirantBiggestFear">What is your biggest doubt or question for seniors?</label>
+              <textarea class="form-textarea" id="aspirantBiggestFear" rows="3" placeholder="e.g. I want to know if part-time jobs are really available in Toronto or if the agent is lying to me about college fees."></textarea>
+            </div>
+          </div>
+
+          <!-- STEP FINAL: Celebratory Completion -->
+          <div class="wizard-step-content" id="wizardStepCelebration">
+            <div class="celebrate-card">
+              <div class="celebrate-badge">🛡️🎉</div>
+              <h3 style="font-family: var(--font-display); font-size: 1.6rem; color: #fff; margin-bottom: 8px;">
+                You're Officially Part of AbroadShield Club!
+              </h3>
+              <p style="color: var(--text-secondary); max-width: 500px; margin: 0 auto 20px; font-size: 0.92rem;" id="onboardCelebrationText">
+                Your profile has been verified via Google. Your insights will protect thousands of fellow students from deceptive agents.
+              </p>
+
+              <div style="background: rgba(6, 182, 212, 0.12); border: 1px solid var(--border-accent); border-radius: var(--radius-md); padding: 16px; max-width: 500px; margin: 0 auto 24px; text-align: left;">
+                <div style="font-weight: 700; color: var(--cyan-bright); margin-bottom: 6px;">
+                  <i class="fa-solid fa-circle-check"></i> What We Just Set Up For You:
+                </div>
+                <ul style="color: #cbd5e1; font-size: 0.85rem; padding-left: 20px; line-height: 1.6;">
+                  <li>Google Account linked securely with verified handle</li>
+                  <li>Private Instagram-style DM channel enabled (No phone # needed)</li>
+                  <li id="seniorImpactSummary">Your agent review &amp; area reality guide are now live for juniors</li>
+                </ul>
+              </div>
+
+              <button type="button" class="btn-primary" style="padding: 12px 32px; font-size: 1rem;" onclick="window.finishOnboarding()">
+                <i class="fa-solid fa-rocket"></i> Enter AbroadShield Platform
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Wizard Navigation Footer -->
+        <div class="modal-footer" id="wizardFooterControls">
+          <button type="button" class="btn-secondary" id="btnWizardCancel" onclick="window.closeOnboardingModal()">
+            <i class="fa-solid fa-xmark"></i> Cancel / Explore First
+          </button>
+          <div style="display: flex; gap: 8px;">
+            <button type="button" class="btn-secondary" id="btnWizardBack" style="display: none;" onclick="window.onboardPrevStep()">
+              <i class="fa-solid fa-arrow-left"></i> Back
+            </button>
+            <button type="button" class="btn-primary" id="btnWizardNext" onclick="window.onboardNextStep()">
+              Next Step <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       MODAL: Confidential Admin Vault (Admin Eyes Only)
+       ==================================================================== -->
+  <div class="modal-overlay" id="modalAdminVault" role="dialog" aria-modal="true">
+    <div class="modal-window" style="max-width: 960px; width: 95%;">
+      <div class="modal-header" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.12), rgba(6, 182, 212, 0.12));">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div class="admin-shield-icon-badge">
+            <i class="fa-solid fa-user-lock"></i>
+          </div>
+          <div>
+            <h3 class="modal-title" style="color: #ffffff; font-size: 1.15rem;">Admin Confidential Information Vault</h3>
+            <span style="font-size: 0.72rem; color: #94a3b8; font-weight: 600;">RESTRICTED ACCESS • ISO/IEC 27701 PRIVACY PROTECTED • ADMIN EYES ONLY</span>
+          </div>
+        </div>
+        <button class="modal-close-btn modal-close-trigger">&times;</button>
+      </div>
+
+      <!-- Section A: Passkey Gate (if locked) -->
+      <div id="adminPasskeyGate" style="padding: 36px 24px; text-align: center;">
+        <div style="width: 68px; height: 68px; border-radius: var(--radius-full); background: rgba(6, 182, 212, 0.12); border: 1px solid var(--border-accent); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; color: var(--cyan-bright); font-size: 1.8rem; box-shadow: var(--shadow-glow);">
+          <i class="fa-solid fa-key"></i>
+        </div>
+        <h4 style="font-family: var(--font-display); font-size: 1.3rem; margin-bottom: 6px; color: #ffffff;">Enter Administrator Security Passkey</h4>
+        <p style="color: var(--text-secondary); font-size: 0.86rem; max-width: 480px; margin: 0 auto 20px;">
+          Real student identity parameters (Google emails, dates of birth, university student ID numbers, and hardware device fingerprints) are strictly isolated from all client feeds. Enter the administrator key to decrypt:
+        </p>
+        <div style="max-width: 320px; margin: 0 auto;">
+          <input type="password" id="inputAdminPasskey" class="form-input" placeholder="Enter passkey (e.g. admin2026)" style="text-align: center; font-size: 1.05rem; letter-spacing: 2px;" autocomplete="off">
+          <button type="button" class="btn-primary" style="width: 100%; margin-top: 12px; justify-content: center;" onclick="window.unlockAdminVault()">
+            <i class="fa-solid fa-unlock"></i> Unlock Confidential Vault
+          </button>
+          <div id="adminPasskeyError" style="color: #fca5a5; font-size: 0.8rem; margin-top: 8px; display: none;">
+            <i class="fa-solid fa-circle-exclamation"></i> Invalid Administrator Passkey
+          </div>
+          <div style="margin-top: 14px; font-size: 0.76rem; color: var(--text-muted); background: rgba(0,0,0,0.3); padding: 8px; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.06);">
+            Default Master Passkey: <code style="color: var(--cyan-bright); font-weight: 700;">admin2026</code>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section B: Unlocked Confidential Dashboard -->
+      <div id="adminVaultDashboard" style="display: none;">
+        <div class="modal-body" style="max-height: 72vh; overflow-y: auto;">
+          <!-- Top Stats Row -->
+          <div class="admin-vault-stats-grid">
+            <div class="admin-stat-card">
+              <span class="stat-card-label">TOTAL VERIFIED STUDENTS</span>
+              <span class="stat-card-val" id="adminVaultTotalCount">792</span>
+              <span class="stat-card-sub" style="color: #6ee7b7;"><i class="fa-solid fa-check"></i> 100% ID Privacy Sealed</span>
+            </div>
+            <div class="admin-stat-card">
+              <span class="stat-card-label">ACTIVE DEVICE BINDINGS</span>
+              <span class="stat-card-val" id="adminVaultDeviceCount">792</span>
+              <span class="stat-card-sub" style="color: var(--cyan-bright);"><i class="fa-solid fa-microchip"></i> 1 Device = 1 Student</span>
+            </div>
+            <div class="admin-stat-card">
+              <span class="stat-card-label">AGENT HARVESTERS BLOCKED</span>
+              <span class="stat-card-val" style="color: #fca5a5;">3</span>
+              <span class="stat-card-sub" style="color: #fca5a5;"><i class="fa-solid fa-ban"></i> Multi-Account Banned</span>
+            </div>
+          </div>
+
+          <!-- Live Destination Breakdown -->
+          <div class="admin-country-distro" id="adminCountryDistroWrap">
+            <!-- Rendered by JS -->
+          </div>
+
+          <!-- Confidential Student Records Table -->
+          <div class="confidential-table-header" style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <div>
+              <h4 style="font-size: 0.95rem; font-weight: 700; color: #fff;">
+                <i class="fa-solid fa-table-list" style="color: var(--cyan-bright);"></i> Confidential Student Identity Registry (Admin Eyes Only)
+              </h4>
+              <p style="font-size: 0.76rem; color: var(--text-muted);">
+                Raw names, emails, dates of birth, and student proof IDs are isolated here. Public views display strictly the chosen username.
+              </p>
+            </div>
+            <button class="btn-secondary" style="font-size: 0.75rem; padding: 6px 12px;" onclick="window.exportAdminVaultCSV()">
+              <i class="fa-solid fa-file-csv"></i> Export Encrypted CSV
+            </button>
+          </div>
+
+          <div class="admin-records-table-container">
+            <table class="admin-vault-table">
+              <thead>
+                <tr>
+                  <th>Public Alias</th>
+                  <th>Real Google Name &amp; Email</th>
+                  <th>DOB &amp; Age</th>
+                  <th>Student ID Proof</th>
+                  <th>Country</th>
+                  <th>Device Fingerprint Hash</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="adminVaultTableBody">
+                <!-- Injected via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="modal-footer" style="justify-content: space-between;">
+          <div style="font-size: 0.75rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px;">
+            <i class="fa-solid fa-lock" style="color: var(--cyan-bright);"></i> All records encrypted under SHA-256 device lock. No external API exposure.
+          </div>
+          <button type="button" class="btn-secondary" onclick="window.lockAdminVault()">
+            <i class="fa-solid fa-lock"></i> Lock Vault
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <!-- Scripts -->
+  <script src="js/security.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/animation3d.js"></script>
+</body>
+</html>
