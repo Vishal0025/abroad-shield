@@ -32,9 +32,9 @@ document.addEventListener('DOMContentLoaded', () => {
     friends: (() => {
       try {
         const saved = localStorage.getItem('abroad_shield_friends');
-        return saved ? JSON.parse(saved) : ['usr_harpreet_ca', 'usr_ananya_uk'];
+        return saved ? JSON.parse(saved) : [];
       } catch (e) {
-        return ['usr_harpreet_ca', 'usr_ananya_uk'];
+        return [];
       }
     })(),
     chatFilter: 'all' // 'all' | 'friends'
@@ -385,6 +385,8 @@ document.addEventListener('DOMContentLoaded', () => {
       customRegistrations.forEach(r => {
         if (r.country && baseline[r.country] !== undefined) {
           baseline[r.country]++;
+        } else if (r.country && r.country !== 'All') {
+          baseline[r.country] = (baseline[r.country] || 0) + 1;
         }
       });
     }
@@ -393,8 +395,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        Object.keys(baseline).forEach(c => {
-          if (parsed[c] && parsed[c] > baseline[c]) {
+        Object.keys(parsed).forEach(c => {
+          if (parsed[c] && (!baseline[c] || parsed[c] > baseline[c])) {
             baseline[c] = parsed[c];
           }
         });
@@ -425,13 +427,49 @@ document.addEventListener('DOMContentLoaded', () => {
       'UK': 'countUK',
       'USA': 'countUSA',
       'Australia': 'countAus',
-      'Germany': 'countGermany'
+      'Germany': 'countGermany',
+      'Ireland': 'countIreland',
+      'France': 'countFrance',
+      'Netherlands': 'countNetherlands'
     };
 
     Object.entries(map).forEach(([country, elId]) => {
       const el = document.getElementById(elId);
       if (el) el.textContent = counts[country] || 0;
     });
+
+    // Check if any newly registered country needs its pill added to toolbar
+    const toolbar = document.getElementById('countryFilterNav');
+    if (toolbar) {
+      Object.entries(counts).forEach(([c, cnt]) => {
+        if (!c || c === 'All') return;
+        const existingPill = toolbar.querySelector(`.country-pill[data-country="${c}"]`);
+        if (!existingPill) {
+          const pill = document.createElement('button');
+          pill.className = 'country-pill';
+          pill.dataset.country = c;
+          pill.id = 'filterCountry' + c.replace(/[^a-zA-Z0-9]/g, '');
+          const flag = getCountryFlag(c);
+          pill.innerHTML = `${flag} ${c} <span class="country-count-tag" id="count${c.replace(/[^a-zA-Z0-9]/g, '')}">${cnt}</span>`;
+          pill.addEventListener('click', () => {
+            document.querySelectorAll('.country-pill').forEach(b => b.classList.remove('active'));
+            pill.classList.add('active');
+            state.activeCountry = c;
+            loadData();
+            showToast(`Filtered by ${c} (${cnt} active students)`);
+          });
+          const globalPicker = toolbar.querySelector('.global-country-picker-wrap');
+          if (globalPicker) {
+            toolbar.insertBefore(pill, globalPicker);
+          } else {
+            toolbar.appendChild(pill);
+          }
+        } else {
+          const tag = existingPill.querySelector('.country-count-tag');
+          if (tag) tag.textContent = cnt;
+        }
+      });
+    }
 
     // Update onboard preview if open
     const onboardSelect = document.getElementById('onboardCountrySelect');
@@ -444,15 +482,93 @@ document.addEventListener('DOMContentLoaded', () => {
     renderAdminCountryDistro();
   }
 
+  // Auto-Count for New Country Registration (Students & Agents)
   function incrementCountryStudentCount(country) {
-    if (!country) return;
+    if (!country || country === 'All') return;
     if (!state.countryStudentCounts[country]) {
-      state.countryStudentCounts[country] = 100;
+      // Start the count for this new country!
+      state.countryStudentCounts[country] = 1;
+    } else {
+      state.countryStudentCounts[country]++;
     }
-    state.countryStudentCounts[country]++;
     localStorage.setItem('abroad_country_counts', JSON.stringify(state.countryStudentCounts));
     renderCountryCounters();
+    updateDynamicStats();
     showToast(`📊 Auto-Updated: ${country} now has ${state.countryStudentCounts[country]} registered students!`);
+  }
+
+  // Dynamic Real-Time Statistics Engine (Hero Stats, Countries, Agents, Students)
+  function updateDynamicStats() {
+    calculateAndSyncCountryStudentCounts();
+
+    // 1. Calculate unique destination countries from students and consultancies
+    const allUniqueCountries = new Set();
+    Object.keys(state.countryStudentCounts || {}).forEach(c => {
+      if (c && c !== 'All') allUniqueCountries.add(c);
+    });
+
+    (state.profiles || []).forEach(p => {
+      if (p.destination_country && p.destination_country !== 'All') {
+        allUniqueCountries.add(p.destination_country);
+      }
+    });
+
+    (state.reviews || []).forEach(r => {
+      if (r.destination_country && r.destination_country !== 'All') {
+        allUniqueCountries.add(r.destination_country);
+      }
+    });
+
+    // 2. Calculate unique agencies (consultancies) reviewed on Wall of Truth
+    const uniqueAgencies = new Set();
+    (state.reviews || []).forEach(r => {
+      if (r.agency_name && r.agency_name.trim() && !r.is_demo) {
+        uniqueAgencies.add(r.agency_name.trim().toLowerCase());
+      }
+    });
+    const totalAgentsCount = uniqueAgencies.size || 48;
+
+    // 3. Calculate total reviews (excluding demo accounts)
+    const realReviews = (state.reviews || []).filter(r => !r.is_demo);
+    const totalReviewsCount = realReviews.length;
+
+    // 4. Calculate total verified students
+    const totalStudents = Object.values(state.countryStudentCounts || {}).reduce((acc, c) => acc + (parseInt(c, 10) || 0), 0);
+
+    // 5. Update Hero Stats Elements
+    const statUniqueCountriesEl = document.getElementById('statUniqueCountries');
+    const statCountriesLabelEl = document.getElementById('statCountriesLabel');
+    const statTotalAgentsEl = document.getElementById('statTotalAgentsCount');
+    const statTotalStudentsEl = document.getElementById('statTotalStudentsCount');
+    const statReportedCasesEl = document.getElementById('statReportedCases');
+
+    if (statUniqueCountriesEl) {
+      statUniqueCountriesEl.textContent = `${allUniqueCountries.size} Countries`;
+    }
+    if (statCountriesLabelEl) {
+      const countryNames = Array.from(allUniqueCountries);
+      const topDisplay = countryNames.slice(0, 5).map(c => {
+        if (c === 'United Kingdom') return 'UK';
+        if (c === 'United States') return 'USA';
+        if (c === 'Australia') return 'AUS';
+        if (c === 'Germany') return 'GER';
+        if (c === 'Canada') return 'Canada';
+        if (c === 'Ireland') return 'IRE';
+        if (c === 'France') return 'FRA';
+        return c;
+      });
+      statCountriesLabelEl.textContent = topDisplay.join(', ') + (countryNames.length > 5 ? ` +${countryNames.length - 5} more` : '');
+    }
+
+    if (statTotalAgentsEl) {
+      statTotalAgentsEl.textContent = `${totalAgentsCount}+`;
+    }
+    if (statTotalStudentsEl) {
+      statTotalStudentsEl.textContent = `${totalStudents}+`;
+    }
+    if (statReportedCasesEl) {
+      statReportedCasesEl.textContent = `${totalReviewsCount > 0 ? totalReviewsCount : '1,480'}+`;
+    }
   }
 
   function renderAdminCountryDistro() {
@@ -463,7 +579,10 @@ document.addEventListener('DOMContentLoaded', () => {
       'UK': '🇬🇧',
       'USA': '🇺🇸',
       'Australia': '🇦🇺',
-      'Germany': '🇩🇪'
+      'Germany': '🇩🇪',
+      'Ireland': '🇮🇪',
+      'France': '🇫🇷',
+      'Netherlands': '🇳🇱'
     };
     distroWrap.innerHTML = Object.entries(state.countryStudentCounts).map(([c, count]) => `
       <div class="country-distro-pill">
@@ -707,6 +826,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const drawerCountSeniors = document.getElementById('drawerCountSeniors');
       if (drawerCountSeniors) drawerCountSeniors.textContent = state.profiles.length;
 
+      // Update Dynamic Auto-Counting Engine
+      updateDynamicStats();
+
       // 4. Live Supabase Real-time Cloud Subscriptions
       if (!state.hasInitializedRealtime && window.supabaseService) {
         state.hasInitializedRealtime = true;
@@ -717,6 +839,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (!exists) {
             state.reviews.unshift(newReview);
             renderReviews();
+            updateDynamicStats();
             const badge = document.getElementById('countTabReviews');
             if (badge) badge.textContent = state.reviews.length;
             showToast(`🏛️ Live review posted: ${newReview.agency_name}`);
@@ -817,6 +940,31 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
           </div>
 
+          <!-- Senior Feedback on Ground Realities: The Problems & The Benefits -->
+          ${((r.ground_problems || r.what_actually_happened) || (r.key_benefits || (r.recommended ? r.treatment_summary : ''))) ? `
+            <div class="feedback-ground-truth-grid">
+              ${(r.ground_problems || r.what_actually_happened) ? `
+                <div class="ground-feedback-box problems-box">
+                  <div class="ground-feedback-header">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>⚠️ Ground Problems &amp; Hardships Faced:</span>
+                  </div>
+                  <p class="ground-feedback-content">${escapeHtml(r.ground_problems || r.what_actually_happened)}</p>
+                </div>
+              ` : ''}
+
+              ${(r.key_benefits || (r.recommended ? r.treatment_summary : '')) ? `
+                <div class="ground-feedback-box benefits-box">
+                  <div class="ground-feedback-header">
+                    <i class="fa-solid fa-star"></i>
+                    <span>🌟 Real Benefits &amp; Positives Gained:</span>
+                  </div>
+                  <p class="ground-feedback-content">${escapeHtml(r.key_benefits || (r.recommended ? r.treatment_summary : 'Authentic program and verified visa processing'))}</p>
+                </div>
+              ` : ''}
+            </div>
+          ` : ''}
+
           ${r.hidden_charges_taken && r.hidden_charges_taken !== 'None reported' ? `
             <div class="alert-strip hidden-fee">
               <i class="fa-solid fa-wallet" style="margin-top: 2px;"></i>
@@ -882,14 +1030,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const listEl = document.getElementById('chatThreadsList');
     if (!listEl) return;
 
-    // Filter count synchronization
+    // Filter count synchronization (strictly excluding demo seed accounts)
+    const demoIds = ['usr_rahul_toronto', 'usr_ananya_london', 'usr_harpreet_vancouver', 'usr_rohit_dallas', 'usr_neha_berlin', 'usr_karthik_melb'];
+    const activeProfiles = (state.profiles || []).filter(p => !p.is_demo && !demoIds.includes(p.id));
     const allCountEl = document.getElementById('chatCountAll');
     const friendsCountEl = document.getElementById('chatCountFriends');
-    const friendsOnly = state.profiles.filter(p => window.isFriend(p.id));
-    if (allCountEl) allCountEl.textContent = state.profiles.length;
+    const friendsOnly = activeProfiles.filter(p => window.isFriend(p.id));
+    if (allCountEl) allCountEl.textContent = activeProfiles.length;
     if (friendsCountEl) friendsCountEl.textContent = friendsOnly.length;
 
-    let list = state.chatFilter === 'friends' ? friendsOnly : state.profiles;
+    let list = state.chatFilter === 'friends' ? friendsOnly : activeProfiles;
 
     if (list.length === 0) {
       if (state.chatFilter === 'friends') {
@@ -1225,7 +1375,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const container = document.getElementById('seniorsGrid');
     if (!container) return;
 
-    let list = state.profiles;
+    // Filter out demo seed accounts
+    const demoIds = ['usr_rahul_toronto', 'usr_ananya_london', 'usr_harpreet_vancouver', 'usr_rohit_dallas', 'usr_neha_berlin', 'usr_karthik_melb'];
+    let list = (state.profiles || []).filter(p => !p.is_demo && !demoIds.includes(p.id));
+
+    // If current logged-in student has verified as a senior, ensure they appear in the mentor directory
+    if (state.currentUser && state.currentUser.role === 'senior_student' && state.currentUser.has_completed_onboarding) {
+      const alreadyIn = list.some(p => p.id === state.currentUser.id || p.username === state.currentUser.username);
+      if (!alreadyIn) {
+        list.unshift(state.currentUser);
+      }
+    }
 
     // Filter by Country
     if (state.seniorCountryFilter && state.seniorCountryFilter !== 'All') {
@@ -1517,29 +1677,35 @@ document.addEventListener('DOMContentLoaded', () => {
     const hiddenFee = document.getElementById('formHiddenCharges').value;
     const threat = document.getElementById('formThreats').value;
     const isAnon = document.getElementById('formIsAnonymous').checked;
+    const groundProblems = document.getElementById('formGroundProblems')?.value.trim() || actual;
+    const keyBenefits = document.getElementById('formKeyBenefits')?.value.trim() || '';
 
     const payload = {
       agency_name: agencyName,
-      branch_city: branchCity,
-      student_id: state.currentUser.id,
-      student_name: isAnon ? 'Anonymous Senior' : state.currentUser.display_name,
-      student_handle: isAnon ? 'anonymous' : state.currentUser.username,
+      branch_city: branchCity || 'Not Specified',
+      student_id: state.currentUser ? state.currentUser.id : ('usr_' + Date.now()),
+      student_name: isAnon ? 'Anonymous Senior' : (state.currentUser ? state.currentUser.display_name : 'Verified Student'),
+      student_handle: isAnon ? 'anonymous' : (state.currentUser ? state.currentUser.username : 'student'),
       is_anonymous: isAnon,
       destination_country: country,
       rating: rating,
       treatment_summary: summary,
       what_they_promised: promised,
       what_actually_happened: actual,
+      ground_problems: groundProblems,
+      key_benefits: keyBenefits,
       hidden_charges_taken: hiddenFee,
       threat_or_pressure: threat,
-      recommended: parseInt(rating, 10) >= 3
+      recommended: parseInt(rating, 10) >= 3,
+      is_demo: false
     };
 
     const newReview = await window.supabaseService.submitAgencyReview(payload);
     state.reviews.unshift(newReview);
     renderReviews();
+    updateDynamicStats();
     closeModal();
-    showToast('Your honest agency review has been published!');
+    showToast('Your honest agency review with ground problems & benefits has been published!');
   }
 
   // 11. Profile Edit & Privacy Management Handler
@@ -1679,10 +1845,18 @@ document.addEventListener('DOMContentLoaded', () => {
       };
     }
 
+    // Save / Sync profile to Supabase Cloud abroad_profiles
+    if (window.supabaseService) {
+      window.supabaseService.upsertProfile(state.currentUser).catch(err => {
+        console.warn('Profile cloud upsert failed (cached):', err);
+      });
+    }
+
     updateUserHeaderUI();
     renderSeniors();
     renderChatSidebar();
     updateDrawerAuthUI();
+    updateDynamicStats();
     closeModal();
 
     if (sharePublicly && mobile) {
@@ -2142,6 +2316,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const treatment = document.getElementById('onboardTreatment')?.value.trim() || 'Overall okay process.';
     const goldenTip = document.getElementById('onboardGoldenTip')?.value.trim() || 'Do your own research!';
 
+    const groundProblems = document.getElementById('onboardGroundProblems')?.value.trim();
+    const keyBenefits = document.getElementById('onboardKeyBenefits')?.value.trim();
+
     // 1. Update Current User object & LocalStorage
     state.currentUser.role = 'senior_student';
     state.currentUser.destination_country = onboarding.country;
@@ -2171,9 +2348,12 @@ document.addEventListener('DOMContentLoaded', () => {
           treatment_summary: treatment.substring(0, 80) + '...',
           what_they_promised: `Promised smooth visa and living cost under $500/mo.`,
           what_actually_happened: `Actual shared rent is $${rent}/mo and groceries $${food}/mo. Jobs in ${city} are ${onboarding.jobReality}.`,
+          ground_problems: groundProblems || `Rent is $${rent}/mo. Jobs in ${city} are ${onboarding.jobReality}. ${hiddenExpenses !== 'None' ? 'Hidden expenses: ' + hiddenExpenses : ''}`,
+          key_benefits: keyBenefits || `Enrolled at ${uni} in ${course}. Area safety: ${onboarding.safetyRating}/5.`,
           hidden_charges_taken: hiddenCharges,
           threat_or_pressure: treatment,
-          recommended: parseInt(agentRating, 10) >= 3
+          recommended: parseInt(agentRating, 10) >= 3,
+          is_demo: false
         });
       } catch (e) {
         console.warn('Review publish err:', e);
@@ -2210,6 +2390,9 @@ document.addEventListener('DOMContentLoaded', () => {
 4. ADVICE REGARDING AGENTS:
 ${agentName ? `I used ${agentName} (${agentCity}). Rating: ${agentRating}/5. Tip: ${goldenTip}` : `Tip: ${goldenTip}`}
 
+${groundProblems ? `\n⚠️ GROUND PROBLEMS FACED:\n${groundProblems}\n` : ''}
+${keyBenefits ? `\n🌟 REAL BENEFITS GAINED:\n${keyBenefits}\n` : ''}
+
 DM me directly on AbroadShield if you have any questions!`,
         tags: [onboarding.country, city, 'EnvironmentGuide', 'LivingCost']
       });
@@ -2217,9 +2400,19 @@ DM me directly on AbroadShield if you have any questions!`,
       console.warn('Discussion publish err:', e);
     }
 
-    // Update UI
+    // 4. Save / Upsert Profile to Cloud Supabase Database
+    try {
+      if (window.supabaseService) {
+        await window.supabaseService.upsertProfile(state.currentUser);
+      }
+    } catch (e) {
+      console.warn('Profile cloud upsert err:', e);
+    }
+
+    // Update UI & Auto-Counts
     updateUserHeaderUI();
     incrementCountryStudentCount(onboarding.country);
+    updateDynamicStats();
 
     // Confidential Identity Vault recording (Admin Only)
     if (window.securityService && state.currentUser) {
@@ -2278,8 +2471,18 @@ Looking for verified seniors currently studying there to share advice!`,
       }
     }
 
+    // Save / Upsert Profile to Cloud Supabase Database
+    try {
+      if (window.supabaseService) {
+        await window.supabaseService.upsertProfile(state.currentUser);
+      }
+    } catch (e) {
+      console.warn('Aspirant cloud upsert err:', e);
+    }
+
     updateUserHeaderUI();
     incrementCountryStudentCount(onboarding.country);
+    updateDynamicStats();
 
     // Confidential Identity Vault recording (Admin Only)
     if (window.securityService && state.currentUser) {

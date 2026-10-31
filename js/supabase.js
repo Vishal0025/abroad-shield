@@ -60,35 +60,81 @@ class SupabaseService {
   // 1. Fetch Senior Student Profiles
   async getProfiles(country = 'All') {
     try {
-      let endpoint = 'abroad_profiles?select=*&order=created_at.desc';
+      let endpoint = 'abroad_profiles?select=*&is_demo=neq.true&order=created_at.desc';
       if (country && country !== 'All') {
         endpoint += `&destination_country=eq.${encodeURIComponent(country)}`;
       }
-      return await this.restFetch(endpoint);
+      const profiles = await this.restFetch(endpoint);
+      // Ensure zero demo seed accounts leak through
+      const demoIds = ['usr_rahul_toronto', 'usr_ananya_london', 'usr_harpreet_vancouver', 'usr_rohit_dallas', 'usr_neha_berlin', 'usr_karthik_melb'];
+      return (profiles || []).filter(p => !p.is_demo && !demoIds.includes(p.id));
     } catch (err) {
       console.warn('Error fetching profiles from cloud, using fallback data:', err);
       return this.getFallbackProfiles(country);
     }
   }
 
+  // 1B. Create or Update Student / Senior Profile in Supabase
+  async upsertProfile(profileData) {
+    try {
+      const payload = {
+        id: profileData.id,
+        username: profileData.username,
+        display_name: profileData.display_name || ('@' + profileData.username),
+        avatar_url: profileData.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+        role: profileData.role || 'senior_student',
+        destination_country: profileData.destination_country || 'Canada',
+        current_university: profileData.current_university || profileData.college || 'University Abroad',
+        city: profileData.city || profileData.place || 'Campus Area',
+        college: profileData.college || profileData.current_university || 'University Abroad',
+        course: profileData.course || 'Degree Program',
+        campus_place: profileData.place || profileData.city || 'Campus Area',
+        intake_year: profileData.intake_year || '2024',
+        bio: profileData.bio || '',
+        agent_used: profileData.agent_used || 'Self-Applied',
+        mobile_number: profileData.mobile_number || '',
+        share_phone_publicly: Boolean(profileData.share_phone_publicly),
+        is_verified: true,
+        verification_type: profileData.verification_type || 'Google Student ID Verification',
+        is_demo: false,
+        updated_at: new Date().toISOString()
+      };
+
+      const result = await this.restFetch('abroad_profiles', {
+        method: 'POST',
+        headers: {
+          'Prefer': 'resolution=merge-duplicates'
+        },
+        body: JSON.stringify(payload)
+      });
+      return result[0] || payload;
+    } catch (err) {
+      console.warn('Upsert profile error (cached locally):', err);
+      return profileData;
+    }
+  }
+
   // 2. Fetch Agent Reviews (The Wall of Truth)
   async getAgencyReviews(country = 'All', search = '') {
     try {
-      let endpoint = 'abroad_agency_reviews?select=*&order=created_at.desc';
+      let endpoint = 'abroad_agency_reviews?select=*&is_demo=neq.true&order=created_at.desc';
       if (country && country !== 'All') {
         endpoint += `&destination_country=eq.${encodeURIComponent(country)}`;
       }
       const reviews = await this.restFetch(endpoint);
+      const filtered = (reviews || []).filter(r => !r.is_demo);
       if (search && search.trim()) {
         const q = search.toLowerCase().trim();
-        return reviews.filter(r => 
+        return filtered.filter(r => 
           (r.agency_name && r.agency_name.toLowerCase().includes(q)) ||
           (r.branch_city && r.branch_city.toLowerCase().includes(q)) ||
           (r.treatment_summary && r.treatment_summary.toLowerCase().includes(q)) ||
-          (r.what_they_promised && r.what_they_promised.toLowerCase().includes(q))
+          (r.what_they_promised && r.what_they_promised.toLowerCase().includes(q)) ||
+          (r.ground_problems && r.ground_problems.toLowerCase().includes(q)) ||
+          (r.key_benefits && r.key_benefits.toLowerCase().includes(q))
         );
       }
-      return reviews;
+      return filtered;
     } catch (err) {
       console.warn('Error fetching agency reviews, using fallback:', err);
       return this.getFallbackReviews(country, search);
@@ -110,9 +156,12 @@ class SupabaseService {
         treatment_summary: reviewData.treatment_summary,
         what_they_promised: reviewData.what_they_promised,
         what_actually_happened: reviewData.what_actually_happened,
+        ground_problems: reviewData.ground_problems || reviewData.what_actually_happened || '',
+        key_benefits: reviewData.key_benefits || '',
         hidden_charges_taken: reviewData.hidden_charges_taken || 'None reported',
         threat_or_pressure: reviewData.threat_or_pressure || 'None reported',
         recommended: Boolean(reviewData.recommended),
+        is_demo: false,
         likes_count: 0
       };
 

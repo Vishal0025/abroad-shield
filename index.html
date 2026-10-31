@@ -434,15 +434,23 @@
         <div class="hero-stats-row">
           <div class="stat-item">
             <span class="stat-num" id="statReportedCases">1,480+</span>
-            <span class="stat-label">Agent Reviews & Warnings</span>
+            <span class="stat-label" id="statReviewsLabel">Agent Reviews &amp; Warnings</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-num" id="statTotalAgentsCount">48+</span>
+            <span class="stat-label">Consultancies Rated</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-num" id="statTotalStudentsCount">792+</span>
+            <span class="stat-label">Verified Students</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-num" id="statUniqueCountries">5 Countries</span>
+            <span class="stat-label" id="statCountriesLabel">Canada, UK, USA, AUS, GER</span>
           </div>
           <div class="stat-item">
             <span class="stat-num" id="statMoneySaved">₹4.8 Cr</span>
             <span class="stat-label">Unnecessary Fees Saved</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-num">5 Countries</span>
-            <span class="stat-label">Canada, UK, USA, AUS, GER</span>
           </div>
           <div class="stat-item">
             <span class="stat-num">0 Phone #s</span>
@@ -1043,6 +1051,22 @@
           <div class="form-field">
             <label class="form-label" for="formActuallyHappened">What actually happened in reality?</label>
             <textarea class="form-textarea" id="formActuallyHappened" rows="2" placeholder="e.g. College was not eligible for PGWP; jobs were non-existent"></textarea>
+          </div>
+
+          <div class="form-field ground-problems-field">
+            <label class="form-label" for="formGroundProblems" style="color: #ff6b6b; font-weight: 700;">
+              <i class="fa-solid fa-triangle-exclamation"></i> Ground Problems &amp; Hardships Faced (The Real Traps)
+            </label>
+            <textarea class="form-textarea" id="formGroundProblems" rows="2" placeholder="What problems did you actually face? (e.g. rent spikes, tight part-time jobs, delayed visa filing, surprise charges, cold winter)"></textarea>
+            <span class="form-hint" style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 4px;">Share the raw difficulties so new students can prepare in advance.</span>
+          </div>
+
+          <div class="form-field ground-benefits-field">
+            <label class="form-label" for="formKeyBenefits" style="color: #20c997; font-weight: 700;">
+              <i class="fa-solid fa-star"></i> Real Benefits &amp; Positives Gained (What Was Truly Worth It)
+            </label>
+            <textarea class="form-textarea" id="formKeyBenefits" rows="2" placeholder="What genuine benefits did you gain? (e.g. eligible for PGWP/PR, high graduate starting pay, top-tier professors, tuition-free perks, good community)"></textarea>
+            <span class="form-hint" style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 4px;">Highlight authentic positives so juniors make balanced, wise decisions.</span>
           </div>
 
           <div class="form-row-2">
@@ -1753,6 +1777,20 @@
             <div class="form-field">
               <label class="form-label" for="onboardTreatment">How did they treat you? Any threats or document withholding?</label>
               <textarea class="form-textarea" id="onboardTreatment" rows="2" placeholder="e.g. Refused to return my original 10th/12th marksheets until I paid 50k extra; pushed an unaccredited college."></textarea>
+            </div>
+
+            <div class="form-field ground-problems-field">
+              <label class="form-label" for="onboardGroundProblems" style="color: #ff6b6b; font-weight: 700;">
+                <i class="fa-solid fa-triangle-exclamation"></i> Ground Problems &amp; Hardships You Faced:
+              </label>
+              <textarea class="form-textarea" id="onboardGroundProblems" rows="2" placeholder="e.g. Severe housing shortage, winter heating bills, delayed SIN/NI numbers, lack of job callbacks."></textarea>
+            </div>
+
+            <div class="form-field ground-benefits-field">
+              <label class="form-label" for="onboardKeyBenefits" style="color: #20c997; font-weight: 700;">
+                <i class="fa-solid fa-star"></i> Real Benefits &amp; Positives Gained:
+              </label>
+              <textarea class="form-textarea" id="onboardKeyBenefits" rows="2" placeholder="e.g. Solid STEM work permit, advanced lab access, internship opportunities, supportive student clubs."></textarea>
             </div>
 
             <div class="form-field">
