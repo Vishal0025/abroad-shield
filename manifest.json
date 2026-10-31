@@ -1,0 +1,21 @@
+{
+  "name": "AbroadShield Club",
+  "short_name": "AbroadShield",
+  "description": "Real Feedback from Students Abroad — Don't Fall for Agent Scams",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#060913",
+  "theme_color": "#0d1527",
+  "icons": [
+    {
+      "src": "/assets/logo.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "/assets/logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+# Robots.txt for AbroadShield Club
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+
+Sitemap: https://globalsenior.netlify.app/sitemap.xml
