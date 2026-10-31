@@ -707,6 +707,35 @@ document.addEventListener('DOMContentLoaded', () => {
       const drawerCountSeniors = document.getElementById('drawerCountSeniors');
       if (drawerCountSeniors) drawerCountSeniors.textContent = state.profiles.length;
 
+      // 4. Live Supabase Real-time Cloud Subscriptions
+      if (!state.hasInitializedRealtime && window.supabaseService) {
+        state.hasInitializedRealtime = true;
+
+        window.supabaseService.subscribeToReviews((newReview) => {
+          if (!newReview || !newReview.id) return;
+          const exists = state.reviews.some(r => r.id === newReview.id);
+          if (!exists) {
+            state.reviews.unshift(newReview);
+            renderReviews();
+            const badge = document.getElementById('countTabReviews');
+            if (badge) badge.textContent = state.reviews.length;
+            showToast(`🏛️ Live review posted: ${newReview.agency_name}`);
+          }
+        });
+
+        window.supabaseService.subscribeToDiscussions((newPost) => {
+          if (!newPost || !newPost.id) return;
+          const exists = state.discussions.some(d => d.id === newPost.id);
+          if (!exists) {
+            state.discussions.unshift(newPost);
+            renderDiscussions();
+            const badge = document.getElementById('countTabFeed');
+            if (badge) badge.textContent = state.discussions.length;
+            showToast(`💬 Live question posted: ${newPost.title}`);
+          }
+        });
+      }
+
     } catch (err) {
       console.error('Error loading data:', err);
     }
@@ -964,6 +993,43 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     await loadChatMessages();
+
+    // Supabase Real-time WebSocket Subscription for this 1-on-1 Chat
+    if (state.realtimeChatSubscription) {
+      state.realtimeChatSubscription.unsubscribe();
+      state.realtimeChatSubscription = null;
+    }
+    if (window.supabaseService && window.supabaseService.subscribeToDirectMessages) {
+      state.realtimeChatSubscription = window.supabaseService.subscribeToDirectMessages(
+        state.currentUser.id,
+        user.id,
+        (newIncomingMsg) => {
+          if (!newIncomingMsg || !newIncomingMsg.id) return;
+          const exists = state.chatMessages.some(m => m.id === newIncomingMsg.id);
+          if (!exists) {
+            state.chatMessages.push(newIncomingMsg);
+            const scrollArea = document.getElementById('messagesScrollArea');
+            if (scrollArea) {
+              const isSent = newIncomingMsg.sender_id === state.currentUser.id;
+              const timeStr = newIncomingMsg.created_at ? new Date(newIncomingMsg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Now';
+              const bubbleHtml = `
+                <div class="chat-bubble-row ${isSent ? 'sent' : 'received'}">
+                  <div class="chat-bubble">${escapeHtml(newIncomingMsg.message)}</div>
+                  <div class="bubble-meta">
+                    ${timeStr} ${isSent ? ' • Delivered <i class="fa-solid fa-check-double" style="color: #67e8f9;"></i>' : ''}
+                  </div>
+                </div>
+              `;
+              scrollArea.insertAdjacentHTML('beforeend', bubbleHtml);
+              scrollArea.scrollTop = scrollArea.scrollHeight;
+              if (!isSent) {
+                showToast(`💬 New message from @${newIncomingMsg.sender_username || user.username || 'senior'}!`);
+              }
+            }
+          }
+        }
+      );
+    }
   }
 
   async function loadChatMessages() {
@@ -1021,12 +1087,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const newMsg = await window.supabaseService.sendDirectMessage(
       state.currentUser.id,
       state.activeChatUser.id,
-      text
+      text,
+      state.currentUser.username || 'student',
+      state.activeChatUser.username || 'senior'
     );
     await loadChatMessages();
 
-    // Natural Friend & Senior Interactive Messaging response
-    triggerSeniorFriendReply(state.activeChatUser, text);
+    // In production real-time mode: If senior is an automated mentor or user is testing
+    if (state.activeChatUser.is_bot || state.activeChatUser.id.startsWith('bot_')) {
+      triggerSeniorFriendReply(state.activeChatUser, text);
+    }
   }
 
   function triggerSeniorFriendReply(senior, userText) {

@@ -226,10 +226,12 @@ class SupabaseService {
   }
 
   // 9. Send Direct Message
-  async sendDirectMessage(senderId, receiverId, message) {
+  async sendDirectMessage(senderId, receiverId, message, senderUsername = 'student', receiverUsername = 'senior') {
     const payload = {
       sender_id: senderId,
       receiver_id: receiverId,
+      sender_username: senderUsername,
+      receiver_username: receiverUsername,
       message: message.trim(),
       is_read: false
     };
@@ -256,6 +258,75 @@ class SupabaseService {
       localMsgs.push(newMsg);
       localStorage.setItem(localKey, JSON.stringify(localMsgs));
       return newMsg;
+    }
+  }
+
+  // 10. Live Supabase Real-time Subscriptions (Production Multi-User Sync)
+  subscribeToDirectMessages(user1, user2, onNewMessage) {
+    if (!this.client || typeof this.client.channel !== 'function') return null;
+    try {
+      const channelId = `chat_dm_${[user1, user2].sort().join('_')}_${Date.now()}`;
+      const channel = this.client.channel(channelId)
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'abroad_direct_messages' },
+          (payload) => {
+            const row = payload.new;
+            if (!row) return;
+            const matches = (row.sender_id === user1 && row.receiver_id === user2) ||
+                            (row.sender_id === user2 && row.receiver_id === user1);
+            if (matches && typeof onNewMessage === 'function') {
+              onNewMessage(row);
+            }
+          }
+        )
+        .subscribe();
+      return channel;
+    } catch (e) {
+      console.warn('Realtime chat subscription error:', e);
+      return null;
+    }
+  }
+
+  // 11. Live Reviews Real-time Subscription (Instant Wall of Truth Updates)
+  subscribeToReviews(onNewReview) {
+    if (!this.client || typeof this.client.channel !== 'function') return null;
+    try {
+      return this.client.channel('realtime_public_reviews')
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'abroad_agency_reviews' },
+          (payload) => {
+            if (payload.new && typeof onNewReview === 'function') {
+              onNewReview(payload.new);
+            }
+          }
+        )
+        .subscribe();
+    } catch (e) {
+      console.warn('Realtime reviews subscription error:', e);
+      return null;
+    }
+  }
+
+  // 12. Live Community Discussions Real-time Subscription
+  subscribeToDiscussions(onNewDiscussion) {
+    if (!this.client || typeof this.client.channel !== 'function') return null;
+    try {
+      return this.client.channel('realtime_public_discussions')
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'abroad_discussions' },
+          (payload) => {
+            if (payload.new && typeof onNewDiscussion === 'function') {
+              onNewDiscussion(payload.new);
+            }
+          }
+        )
+        .subscribe();
+    } catch (e) {
+      console.warn('Realtime discussions subscription error:', e);
+      return null;
     }
   }
 
